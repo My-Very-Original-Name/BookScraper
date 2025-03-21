@@ -18,13 +18,7 @@ from tabulate import tabulate
 from random import randint
 import msvcrt
 import sys
-print("hello")
-# ---- CONFIGURATION ----
-OUTPUT_PDF_PATH = "output/output.pdf"
-SLEEP_PAGE_SECONDS = 1.5  # Time between page turns
-BAR_LENGTH = 50
-
-
+import json
 
 
 # ---- Classes ----
@@ -32,9 +26,9 @@ class Zanichelli:
     """Handles interactions with the Zanichelli website"""
     def __init__(self):
         self.name = "Zanichelli"
-        self.cropping_rectangle = (1189, 50, 2684, 2066)
+        self.cropping_rectangle = [1189, 50, 2684, 2066]
 
-    def start(self, username, password):
+    def start(self, username, password, resolution):
         """Logs into Zanichelli and selects a book"""
         options = Options()
         options.headless = True
@@ -92,10 +86,25 @@ class Zanichelli:
         """Closes the browser"""
         self.driver.quit()
 
+class Hub_scuola():
+    def __init__(self):
+        self.name = "Hub Scuola"
+        self.cropping_rectangle = ()
+
+    def start(self, username, password):
+        """Logs into Zanichelli and selects a book"""
+        options = Options()
+        options.headless = True
+        self.driver = webdriver.Firefox(options=options)
+        self.driver.set_window_size(3840, 2160)
+        self.driver.get("https://www.hubscuola.it/login")
+        self.wait = WebDriverWait(self.driver, 10)
+
+
 # ---- Global variables ----
 classes = [Zanichelli()]
 pdf_merger = PdfMerger()
-bar = ["░" for i in range(BAR_LENGTH)] 
+
 
 # ---- Helper functions -------------------------------
 def clear_console():
@@ -122,6 +131,16 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
             print(colored("Invalid input. Please insert a numeric value.", "red"))
 
 # ---- Main area ----------
+def get_configs():
+    global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar
+    with open("configS.json", "r") as file:
+        f = json.load(file)
+    OUTPUT_PDF_PATH = f["output-path"]
+    CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
+    SLEEP_PAGE_SECONDS = f["sleep-page-seconds"]
+    bar = ["░" for i in range(f["bar-length"])] 
+    return(f[web.name]["resolution-x"], f[web.name]["resolution-y"]), 
+
 def progress_bar(progress, total):
     max_icon = int((50 * progress) / total)
     
@@ -162,12 +181,7 @@ def input_handler():
     username = secure_credential_input(colored(f"Enter your {web.name} username: ","light_blue"))
     password = secure_credential_input(colored(f"Enter your {web.name} password: ","light_blue"))
     clear_console()
-    while True:
-        try:
-            page_number = get_numeric_input(colored("Enter number of pages: ", "light_blue"))
-            break
-        except ValueError:
-            pass
+    page_number = get_numeric_input(colored("Enter number of pages: ", "light_blue"))
     return username, password, page_number
 
 def select_site():
@@ -209,6 +223,7 @@ def main():
     clear_console()
     print(f"{colored("Welcome to BookScraper!\n", "green")}")
     web = select_site()
+    resolution = get_configs()
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
         if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
@@ -216,9 +231,10 @@ def main():
         clear_console()
     username, password, num_of_pages = input_handler()
     os.mkdir(temp_dir)
+    clear_console()
     print("Starting...")
     try:
-        web.start(username, password)
+        web.start(username, password, resolution)
         x = 0
         clear_console()
         while x <= num_of_pages:
