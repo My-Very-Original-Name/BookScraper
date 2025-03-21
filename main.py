@@ -100,6 +100,7 @@ class Hub_scuola():
         self.wait = WebDriverWait(self.driver, 10)
         self._accept_cookies()
         self._enter_credentials(username, password)
+        clear_console()
         self._select_book()
         clear_console()
         self._select_edition()
@@ -112,7 +113,6 @@ class Hub_scuola():
         time.sleep(2)
         elements = self.driver.find_elements(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
         buttons = self.driver.find_elements(By.XPATH, "//button//span[text()='Esplora']")
-        print("hello")
         books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
@@ -166,7 +166,7 @@ def clear_console():
  / /_/ // /_/ // /_/ // ,<  ___/ // /__ / /   / /_/ // /_/ //  __// /    
 /_____/ \____/ \____//_/|_|/____/ \___//_/    \__,_// .___/ \___//_/     
                                                    /_/                   """, "magenta"))
-    print("---------------------------------------------------------------------")
+    print("---------------------------------------------------------------------\n")
 
 def get_numeric_input(prompt, min_val=0, max_val=None):
     """Ensures numeric input within a valid range"""
@@ -197,11 +197,17 @@ def progress_bar(progress, total):
         bar[i] = colored("█", "magenta")
 
     percentage = round((100 * progress) / total, 1)
-    
+    etc = SLEEP_PAGE_SECONDS*(total -progress)
+    if etc >= 3600:
+        etc_str = f"{etc // 3600} hours"
+    elif etc >= 60:
+        etc_str = f"{etc // 60} minutes"
+    else:
+        etc_str = f"{etc} seconds"
     print(
         f"{colored('Scanning:', 'yellow')} {colored(f'{percentage}%', 'red')}  "
         f"{''.join(bar)} "
-        f"[ {colored(progress, 'yellow')} / {colored(total, 'red')} ] pages",
+        f"[ {colored(progress, 'yellow')} / {colored(total, 'red')} ] pages - {colored("ETC: ", "yellow")}{colored(etc_str, "red")}",
         end="\r"
     )
 def secure_credential_input(prompt):
@@ -237,14 +243,7 @@ def select_site():
     print("Select a site")
     for class_ in classes:
         print(f" {colored(classes.index(class_), "red")}: {colored(class_.name, "yellow")}", end = "")
-    selected = input("\nEnter site index: ")
-    while not selected.isnumeric():
-        print(colored("Invalid input. Please insert a numeric value.", "red"))
-        selected = input(colored("Enter site index: ", "light_blue"))
-    if int(selected) > len(classes) - 1:
-        os.system("cls")
-        print(colored("Invalid input. Please insert a value less than " + str(len(classes) - 1), "red"))
-        select_site()
+    selected = get_numeric_input(colored("\nEnter site index: ", "light_blue"), 0, len(classes)-1)
     return classes[int(selected)]
 
 def get_img():
