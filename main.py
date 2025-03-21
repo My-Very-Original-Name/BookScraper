@@ -33,7 +33,7 @@ class Zanichelli:
         options = Options()
         options.headless = True
         self.driver = webdriver.Firefox(options=options)
-        self.driver.set_window_size(3840, 2160)
+        self.driver.set_window_size(resolution[0], resolution[1])
         self.driver.get("https://my.zanichelli.it/home")
         self.wait = WebDriverWait(self.driver, 10)
 
@@ -88,21 +88,70 @@ class Zanichelli:
 
 class Hub_scuola():
     def __init__(self):
-        self.name = "Hub Scuola"
+        self.name = "Hub-Scuola"
         self.cropping_rectangle = ()
 
-    def start(self, username, password):
-        """Logs into Zanichelli and selects a book"""
+    def start(self, username, password, resolution):
         options = Options()
         options.headless = True
         self.driver = webdriver.Firefox(options=options)
-        self.driver.set_window_size(3840, 2160)
+        self.driver.set_window_size(resolution[0], resolution[1])
         self.driver.get("https://www.hubscuola.it/login")
         self.wait = WebDriverWait(self.driver, 10)
+        self._accept_cookies()
+        self._enter_credentials(username, password)
+        self._select_book()
+        clear_console()
+        self._select_edition()
+    def _enter_credentials(self, username, password):
+        self.wait.until(EC.presence_of_element_located((By.ID, ":r6:"))).send_keys(username)
+        self.driver.find_element(By.ID, ":r7:").send_keys(password)
+        self.driver.find_elements(By.XPATH, "//button//span[text()='Accedi']")[1].click()
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A")))
+    def _select_book(self):
+        time.sleep(2)
+        elements = self.driver.find_elements(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
+        buttons = self.driver.find_elements(By.XPATH, "//button//span[text()='Esplora']")
+        print("hello")
+        books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        buttons[i].click()
+    
+    def _select_edition(self):
+        time.sleep(2)
+        all_links = self.driver.find_elements(By.TAG_NAME, "a")
+        first_type_links = []
+        for link in all_links:
+            href = link.get_attribute("href")
+            if href and "young.hubscuola.it" in href:
+                svg_elements = link.find_elements(By.TAG_NAME, "svg")
+                if svg_elements:  
+                    first_type_links.append(link)
+        books = [[colored(str(first_type_links.index(element)), "red"), element.text[:50]]for element in first_type_links]
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(first_type_links) - 1)
+        first_type_links[i].click()
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        time.sleep(5)
+    def _accept_cookies(self):
+        time.sleep(2)
+        try:
+            self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'iubenda-cs-accept-btn') and text()='Accetta e chiudi']"))).click()
+        except Exception:
+            pass  # No cookie popup detected
+    def turn_page(self):
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.g-btn-page.g-btn-page--next"))).click()
+    def take_screenshot(self):
+        """Takes a screenshot of the book"""
+        return self.driver.get_screenshot_as_png()
 
+    def quit(self):
+        """Closes the browser"""
+        self.driver.quit()
 
 # ---- Global variables ----
-classes = [Zanichelli()]
+classes = [Zanichelli(), Hub_scuola()]
 pdf_merger = PdfMerger()
 
 
@@ -139,10 +188,10 @@ def get_configs():
     CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
     SLEEP_PAGE_SECONDS = f["sleep-page-seconds"]
     bar = ["░" for i in range(f["bar-length"])] 
-    return(f[web.name]["resolution-x"], f[web.name]["resolution-y"]), 
+    return f[web.name]["resolution"] 
 
 def progress_bar(progress, total):
-    max_icon = int((50 * progress) / total)
+    max_icon = int((len(bar) * progress) / total)
     
     for i in range(max_icon):
         bar[i] = colored("█", "magenta")
@@ -202,7 +251,7 @@ def get_img():
     img = Image.open(io.BytesIO(web.take_screenshot()))
     if img.mode in ('RGBA', 'LA'):
         img = img.convert('RGB')
-    return img.crop(web.cropping_rectangle)
+    return img.crop(CROPPING_RECTANGLE)
 
 def gen_pdf(img, x):
     try:
@@ -224,6 +273,7 @@ def main():
     print(f"{colored("Welcome to BookScraper!\n", "green")}")
     web = select_site()
     resolution = get_configs()
+    print(resolution)
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
         if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
