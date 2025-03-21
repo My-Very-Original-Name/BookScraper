@@ -18,7 +18,7 @@ from tabulate import tabulate
 from random import randint
 import msvcrt
 import sys
-
+print("hello")
 # ---- CONFIGURATION ----
 OUTPUT_PDF_PATH = "output/output.pdf"
 SLEEP_PAGE_SECONDS = 1.5  # Time between page turns
