@@ -22,21 +22,27 @@ import json
 
 
 # ---- Classes ----
-class Zanichelli:
-    """Handles interactions with the Zanichelli website"""
-    def __init__(self):
-        self.name = "Zanichelli"
-        self.cropping_rectangle = [1189, 50, 2684, 2066]
+class _Base_web():
+    def take_screenshot(self):
+        return self.driver.get_screenshot_as_png()
 
-    def start(self, username, password, resolution):
-        """Logs into Zanichelli and selects a book"""
+    def quit(self):
+        self.driver.quit()
+    def _setup_driver(self, url, resolution):
         options = Options()
         options.headless = True
         self.driver = webdriver.Firefox(options=options)
         self.driver.set_window_size(resolution[0], resolution[1])
-        self.driver.get("https://my.zanichelli.it/home")
+        self.driver.get(url)
         self.wait = WebDriverWait(self.driver, 10)
+    
+class Zanichelli(_Base_web):
+    """Handles interactions with the Zanichelli website"""
+    def __init__(self):
+        self.name = "Zanichelli"
 
+    def start(self, username, password, resolution):
+        self._setup_driver("https://www.zanichelli.it/it/home", resolution)
         # Login
         self._enter_credentials(username, password)
         self._accept_cookies()
@@ -78,26 +84,14 @@ class Zanichelli:
         """Turns the book page"""
         self.wait.until(EC.presence_of_element_located((By.ID, "default_next_bttn"))).click()
 
-    def take_screenshot(self):
-        """Takes a screenshot of the book"""
-        return self.driver.get_screenshot_as_png()
-
-    def quit(self):
-        """Closes the browser"""
-        self.driver.quit()
-
-class Hub_scuola():
+    
+class Hub_scuola(_Base_web):
     def __init__(self):
         self.name = "Hub-Scuola"
-        self.cropping_rectangle = ()
+
 
     def start(self, username, password, resolution):
-        options = Options()
-        options.headless = True
-        self.driver = webdriver.Firefox(options=options)
-        self.driver.set_window_size(resolution[0], resolution[1])
-        self.driver.get("https://www.hubscuola.it/login")
-        self.wait = WebDriverWait(self.driver, 10)
+        self._setup_driver("https://www.hubscuola.it/login", resolution)
         self._accept_cookies()
         self._enter_credentials(username, password)
         clear_console()
@@ -142,13 +136,6 @@ class Hub_scuola():
             pass  # No cookie popup detected
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.g-btn-page.g-btn-page--next"))).click()
-    def take_screenshot(self):
-        """Takes a screenshot of the book"""
-        return self.driver.get_screenshot_as_png()
-
-    def quit(self):
-        """Closes the browser"""
-        self.driver.quit()
 
 # ---- Global variables ----
 classes = [Zanichelli(), Hub_scuola()]
@@ -211,24 +198,23 @@ def progress_bar(progress, total):
         end="\r"
     )
 def secure_credential_input(prompt):
-    """Securely handles credentials input"""
     print(prompt, end='', flush=True)
     password = b""
     
     while True:
         char = msvcrt.getch()
         
-        if char in {b"\r", b"\n"}:  # Enter key
+        if char in {b"\r", b"\n"}: 
             print("")
             break
-        elif char == b"\b":  # Backspace
+        elif char == b"\b":  
             password = password[:-1]
             print("\b \b", end='', flush=True)
-        elif char == b"\x03":  # Ctrl+C
+        elif char == b"\x03": 
             raise KeyboardInterrupt
         else:
             password += char
-            print("*", end='', flush=True)  # Mask input with *
+            print("*", end='', flush=True) 
 
     return password.decode("utf-8")
 
