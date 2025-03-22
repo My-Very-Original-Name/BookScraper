@@ -42,7 +42,7 @@ class Zanichelli(_Base_web):
         self.name = "Zanichelli(Booktab)"
 
     def start(self, username, password, resolution):
-        self._setup_driver("https://www.zanichelli.it/it/home", resolution)
+        self._setup_driver("https://my.zanichelli.it/", resolution)
         self._enter_credentials(username, password)
         self._accept_cookies()
         self._select_book()
@@ -70,7 +70,7 @@ class Zanichelli(_Base_web):
         clear_console()
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(buttons) - 1)
-        
+        self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         time.sleep(5)  
@@ -105,7 +105,9 @@ class Hub_scuola(_Base_web):
         books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        self.book = elements[i].text
         buttons[i].click()
+        
     
     def _select_edition(self):
         time.sleep(2)
@@ -151,10 +153,14 @@ class Mylim(_Base_web):
 
         clear_console()
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
-        elements[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
+        i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        self.book = elements[i].text
+        elements[i].click()
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page")))
+        clear_console()
         print("Waiting for book to load...")
         time.sleep(15)
+        
         
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page"))).click()
@@ -196,15 +202,18 @@ class Sanoma(_Base_web):
         clear_console()
         books = [[colored(str(i), "red"), element.text] for i, element in enumerate(sub_editions)]
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
-        sub_editions[get_numeric_input("\nInsert book index: ", 0, len(sub_editions) - 1)].click()
+        i = get_numeric_input("\nInsert book index: ", 0, len(sub_editions) - 1)
+        self.book = sub_editions[i].text
+        sub_editions[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         clear_console()
         print("Waiting for book to load...")
-        time.sleep(5)
+        time.sleep(7)
         self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
         self.driver.find_element(By.CSS_SELECTOR, "span.icon.icon-page-single").click()
         self.driver.find_element(By.ID, "page-field").send_keys("1")
         self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
+        
 
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
@@ -265,7 +274,7 @@ def progress_bar(progress, total):
     print(
         f"{colored('Scanning:', 'yellow')} {colored(f'{percentage}%', 'red')}  "
         f"{''.join(bar)} "
-        f"[ {colored(progress, 'yellow')} / {colored(total, 'red')} ] pages - {colored("ETC: ", "yellow")}{colored(etc_str, "red")}",
+        f"[ {colored(progress, 'yellow')} / {colored(total, 'red')} ] pages - {colored("ETC: ", "yellow")}{colored(etc_str, "red")}       ",
         end="\r"
     )
 def secure_credential_input(prompt):
@@ -323,7 +332,7 @@ def gen_pdf(img, x):
         print(f"{colored("ERR", "red")}: Failed to process image {x}: {e}")
 
 def main():
-    global web, temp_dir
+    global web, temp_dir, OUTPUT_PDF_PATH
     temp_dir = f"temp_pdfs_{randint(0, 1000)}"
     clear_console()
     print(f"{colored("Welcome to BookScraper!\n", "green")}")
@@ -331,16 +340,14 @@ def main():
     resolution = get_configs()
     print(resolution)
     clear_console()
-    if os.path.exists(OUTPUT_PDF_PATH):
-        if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
-            exit()
-        clear_console()
+    
     username, password, num_of_pages = input_handler()
     os.mkdir(temp_dir)
     clear_console()
     print("Starting...")
     try:
         web.start(username, password, resolution)
+        OUTPUT_PDF_PATH = OUTPUT_PDF_PATH + web.book + ".pdf"
         x = 0
         clear_console()
         while x <= num_of_pages:
@@ -356,6 +363,10 @@ def main():
         web.quit()
         exit(1)
     clear_console()
+    if os.path.exists(OUTPUT_PDF_PATH):
+        if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
+            exit()
+        clear_console()
     print("Merging PDFs...")
     with open(OUTPUT_PDF_PATH, "wb") as pdf_file:
         pdf_merger.write(pdf_file)

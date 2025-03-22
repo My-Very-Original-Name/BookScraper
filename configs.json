@@ -1,6 +1,6 @@
 {
     
-    "output-path": "output/output.pdf",
+    "output-path": "output/",
     "sleep-page-seconds": 1.5,
     "bar-length": 50,
 
