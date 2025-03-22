@@ -37,19 +37,17 @@ class _Base_web():
         self.wait = WebDriverWait(self.driver, 10)
     
 class Zanichelli(_Base_web):
-    """Handles interactions with the Zanichelli website"""
+
     def __init__(self):
-        self.name = "Zanichelli"
+        self.name = "Zanichelli(Booktab)"
 
     def start(self, username, password, resolution):
         self._setup_driver("https://www.zanichelli.it/it/home", resolution)
-        # Login
         self._enter_credentials(username, password)
         self._accept_cookies()
         self._select_book()
 
     def _enter_credentials(self, username, password):
-        """Enter login credentials"""
         email_input = self.wait.until(EC.presence_of_element_located((By.ID, "inline-username-input")))
         password_input = self.driver.find_element(By.ID, "inline-password-input")
 
@@ -60,14 +58,12 @@ class Zanichelli(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.ID, "home")))
 
     def _accept_cookies(self):
-        """Accepts cookie popup if present"""
         try:
             self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
         except Exception:
             pass  # No cookie popup detected
 
     def _select_book(self):
-        """Selects a book from the list"""
         buttons = self.driver.find_elements(By.CSS_SELECTOR, "button[aria-label*='LEGGI EBOOK']")
         books = [[colored(str(i), "red"), btn.get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()] for i, btn in enumerate(buttons)]
 
@@ -77,11 +73,10 @@ class Zanichelli(_Base_web):
         
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
-        time.sleep(5)  # Wait for book to load
+        time.sleep(5)  
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
 
     def turn_page(self):
-        """Turns the book page"""
         self.wait.until(EC.presence_of_element_located((By.ID, "default_next_bttn"))).click()
 
     
@@ -137,14 +132,40 @@ class Hub_scuola(_Base_web):
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.g-btn-page.g-btn-page--next"))).click()
 
+class Mylim(_Base_web):
+    def __init__(self):
+        self.name = "Loescher(Mylim)"
+    def start(self, username, password, resolution):
+        self._setup_driver("https://mylim.loescher.it/#!/login", resolution)
+        self._enter_credentials(username, password)
+        self._select_book()
+    def _enter_credentials(self, username, password):
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'mantine-Button-root') and .//span[text()='Accetta']]"))).click()
+        self.wait.until(EC.presence_of_element_located((By.ID, "mantine-r1"))).send_keys(username)
+        self.wait.until(EC.presence_of_element_located((By.ID, "mantine-r2"))).send_keys(password)
+        self.driver.find_element(By.XPATH, "//button[contains(@class, 'mantine-Button-root') and .//span[text()='Entra']]").click()
+    def _select_book(self):
+        time.sleep(2)
+        elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "PdfCard-module__titolo___UX1Y_")))
+        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(elements)]
+
+        clear_console()
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        elements[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
+        self.wait.until(EC.presence_of_element_located((By.NAME, "next-page")))
+        print("Waiting for book to load...")
+        time.sleep(15)
+
+    def turn_page(self):
+        self.wait.until(EC.presence_of_element_located((By.NAME, "next-page"))).click()
+
 # ---- Global variables ----
-classes = [Zanichelli(), Hub_scuola()]
+classes = [Zanichelli(), Hub_scuola(), Mylim()]
 pdf_merger = PdfMerger()
 
 
 # ---- Helper functions -------------------------------
 def clear_console():
-    """Clears the terminal screen"""
     os.system("cls" if os.name == "nt" else "clear")
     sys.stdout.flush()
     print(colored(r"""    ____                 __   _____                                      
@@ -156,7 +177,6 @@ def clear_console():
     print("---------------------------------------------------------------------\n")
 
 def get_numeric_input(prompt, min_val=0, max_val=None):
-    """Ensures numeric input within a valid range"""
     while True:
         try:
             value = int(input(colored(prompt, "light_blue")))

@@ -5,12 +5,17 @@
     "bar-length": 50,
 
 
-    "Zanichelli": {
+    "Zanichelli(Booktab)": {
         "resolution": [3840, 2160],
         "cropping-rectangle": [1189, 50, 2684, 2066]
     },
     "Hub-Scuola": {
         "resolution": [3840, 2160],
         "cropping-rectangle": [1212, 174, 2612, 1955]
+    },
+    "Loescher(Mylim)":
+    {
+        "resolution": [3840, 2160],
+        "cropping-rectangle": [1098,0,2725,2014]
     }
 }
