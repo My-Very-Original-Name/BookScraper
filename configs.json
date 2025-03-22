@@ -17,5 +17,9 @@
     {
         "resolution": [3840, 2160],
         "cropping-rectangle": [1098,0,2725,2014]
+    },
+    "Sanoma": {
+        "resolution": [3840, 2160],
+        "cropping-rectangle": [1398, 26, 2894, 1977]
     }
 }

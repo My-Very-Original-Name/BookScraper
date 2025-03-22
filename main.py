@@ -128,7 +128,7 @@ class Hub_scuola(_Base_web):
         try:
             self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'iubenda-cs-accept-btn') and text()='Accetta e chiudi']"))).click()
         except Exception:
-            pass  # No cookie popup detected
+            pass  
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.g-btn-page.g-btn-page--next"))).click()
 
@@ -155,12 +155,63 @@ class Mylim(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page")))
         print("Waiting for book to load...")
         time.sleep(15)
-
+        
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page"))).click()
 
+class Sanoma(_Base_web):
+    def __init__(self):
+        self.name = "Sanoma"
+    def start(self, username, password, resolution):
+        self._setup_driver("https://place.sanoma.it/", resolution)
+        self._enter_credentials(username, password)
+        self._select_book()
+    def _enter_credentials(self, username, password):
+        self.wait.until(EC.presence_of_element_located((By.NAME, "text"))).send_keys(username)
+        time.sleep(0.5)
+        self._accept_cookies()
+        self.driver.find_element(By.XPATH, "//button[@title='Accedi']").click()
+        time.sleep(2)
+        self.wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(password)
+        self.driver.find_element(By.NAME, "submit").click()
+    def _accept_cookies(self):
+        try:
+            self.driver.find_element(By.ID, "ppms_cm_agree-to-all").click()
+            self.wait.until(EC.presence_of_element_located((By.ID, "ppms_consent_form_success_note_button"))).click()
+        except Exception:
+            pass
+    def _select_book(self):
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[@href='/prodotti_digitali']"))).click()
+        elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "title")))
+        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(elements)]
+        clear_console()
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        self.driver.find_elements(By.CLASS_NAME, "button-open")[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
+        editions = self.driver.find_elements(By.CLASS_NAME, "volume")
+        clear_console()
+        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(editions)]
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        editions[get_numeric_input("\nInsert book index: ", 0, len(editions) - 1)].click()
+        sub_editions = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//a[contains(@href, 'prodotti_digitali/libromedia')]")))
+        clear_console()
+        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(sub_editions)]
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        sub_editions[get_numeric_input("\nInsert book index: ", 0, len(sub_editions) - 1)].click()
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        clear_console()
+        print("Waiting for book to load...")
+        time.sleep(5)
+        self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
+        self.driver.find_element(By.CSS_SELECTOR, "span.icon.icon-page-single").click()
+        self.driver.find_element(By.ID, "page-field").send_keys("1")
+        self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
+
+    def turn_page(self):
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
+
+
 # ---- Global variables ----
-classes = [Zanichelli(), Hub_scuola(), Mylim()]
+classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma()]
 pdf_merger = PdfMerger()
 
 
