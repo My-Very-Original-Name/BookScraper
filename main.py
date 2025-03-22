@@ -213,6 +213,8 @@ class Sanoma(_Base_web):
         self.driver.find_element(By.CSS_SELECTOR, "span.icon.icon-page-single").click()
         self.driver.find_element(By.ID, "page-field").send_keys("1")
         self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
+    def turn_page(self):
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
 
 class Bsmart(_Base_web):
     def __init__(self):
