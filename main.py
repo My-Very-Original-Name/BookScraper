@@ -213,14 +213,55 @@ class Sanoma(_Base_web):
         self.driver.find_element(By.CSS_SELECTOR, "span.icon.icon-page-single").click()
         self.driver.find_element(By.ID, "page-field").send_keys("1")
         self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
-        
 
+class Bsmart(_Base_web):
+    def __init__(self):
+        self.name = "Bsmart"
+    def start(self, username, password, resolution):
+        self._setup_driver("https://www.bsmart.it/users/sign_in", resolution)
+        self._enter_credentials(username, password)
+        self._select_book()
+    def _enter_credentials(self, username, password):
+        self.wait.until(EC.presence_of_element_located((By.ID, "user_email"))).send_keys(username) 
+        self.driver.find_element(By.ID, "user_password").send_keys(password)
+        self.driver.find_element(By.NAME, "commit").click()
+    def _accept_cookies(self):
+        try:
+            time.sleep(2)
+            self.driver.find_element(By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll").click()
+        except Exception as e:
+            print(e)
+    def _select_book(self):
+        self.wait.until(EC.presence_of_element_located((By.LINK_TEXT, "BSMART BOOKS (new)"))).click()
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/books/')]")))
+        self._accept_cookies()
+        elements = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/books/'][data-discover='true']")
+        titles = []
+        elements_text = []
+        for element in elements:
+            if element.text:
+                titles.append(element.text)
+            elements_text.append(element.text)
+        books = [[colored(str(i), "red"), title] for i, title in enumerate(titles)]
+        clear_console()
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        i = elements_text.index(titles[i])
+        self.book = elements[i].text
+        elements[i].click()
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[title='Vai alla pagina successiva']")))
+        self.driver.find_elements(By.CSS_SELECTOR, "button[aria-pressed='false'].inline-flex.items-center.justify-center.h-fit")[4].click()
+        self.driver.find_element(By.XPATH, "//li[contains(@class, 'dark:text-white') and contains(., 'Disposizione pagine')]").find_element(By.XPATH, ".//button[contains(@class, 'inline-flex')]").click()
+        button = self.driver.find_elements(By.XPATH, "//button[contains(@class, 'inline-flex')]")[6]
+        self.driver.execute_script("arguments[0].click();", button)
     def turn_page(self):
-        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
+        self.driver.find_element(By.CSS_SELECTOR, "button[title='Vai alla pagina successiva'].flex.justify-center.items-center.absolute").click()
+
 
 
 # ---- Global variables ----
-classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma()]
+classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma(), Bsmart()]
 pdf_merger = PdfMerger()
 
 
@@ -253,7 +294,7 @@ def get_configs():
         f = json.load(file)
     OUTPUT_PDF_PATH = f["output-path"]
     CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
-    SLEEP_PAGE_SECONDS = f["sleep-page-seconds"]
+    SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
     bar = ["░" for i in range(f["bar-length"])] 
     return f[web.name]["resolution"] 
 

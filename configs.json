@@ -1,25 +1,35 @@
 {
     
     "output-path": "output/",
-    "sleep-page-seconds": 1.5,
     "bar-length": 50,
-
+    
 
     "Zanichelli(Booktab)": {
         "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
         "cropping-rectangle": [1189, 50, 2684, 2066]
     },
     "Hub-Scuola": {
         "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
         "cropping-rectangle": [1212, 174, 2612, 1955]
     },
     "Loescher(Mylim)":
     {
         "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
         "cropping-rectangle": [1098,0,2725,2014]
     },
     "Sanoma": {
         "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
         "cropping-rectangle": [1398, 26, 2894, 1977]
+    },
+    "Bsmart":{
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 2,
+        "cropping-rectangle": [1131, 78, 2694, 2048]
     }
+
+
 }
