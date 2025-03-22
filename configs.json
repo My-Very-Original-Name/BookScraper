@@ -2,7 +2,8 @@
     
     "output-path": "output/",
     "bar-length": 50,
-    
+    "save-credentials": true,
+    "sites": ["Zanichelli(Booktab)","Hub-Scuola","Loescher(Mylim)","Sanoma","Bsmart"],
 
     "Zanichelli(Booktab)": {
         "resolution": [3840, 2160],

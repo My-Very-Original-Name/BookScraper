@@ -19,9 +19,26 @@ from random import randint
 import msvcrt
 import sys
 import json
+import keyring
 
 
 # ---- Classes ----
+class Credentials():
+    def save_credentials(self,site: str, username: str, password: str):
+        """Save credentials for a given site."""
+        keyring.set_password(site, username, password)
+
+    def get_credentials(self,site: str):
+        """Retrieve stored credentials for a site."""
+        try:
+            usernames = keyring.get_credential(site, None)  
+            if usernames:
+                return usernames.username, keyring.get_password(site, usernames.username)
+            else:
+                return None, None # no credential found
+        except Exception as e:
+            return None, None
+
 class _Base_web():
     def take_screenshot(self):
         return self.driver.get_screenshot_as_png()
@@ -265,7 +282,7 @@ class Bsmart(_Base_web):
 # ---- Global variables ----
 classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma(), Bsmart()]
 pdf_merger = PdfMerger()
-
+credentials = Credentials()
 
 # ---- Helper functions -------------------------------
 def clear_console():
@@ -291,12 +308,13 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
 
 # ---- Main area ----------
 def get_configs():
-    global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar
+    global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar, SAVE_CREDENTIALS
     with open("configS.json", "r") as file:
         f = json.load(file)
     OUTPUT_PDF_PATH = f["output-path"]
     CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
     SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
+    SAVE_CREDENTIALS = f["save-credentials"]
     bar = ["░" for i in range(f["bar-length"])] 
     return f[web.name]["resolution"] 
 
@@ -342,9 +360,17 @@ def secure_credential_input(prompt):
     return password.decode("utf-8")
 
 def input_handler():
-    username = secure_credential_input(colored(f"Enter your {web.name} username: ","light_blue"))
-    password = secure_credential_input(colored(f"Enter your {web.name} password: ","light_blue"))
-    clear_console()
+    username = ""
+    if  SAVE_CREDENTIALS:
+        username, password = credentials.get_credentials(web.name)
+        print(colored("Using saved credentials: ", "yellow")+" if you want to delete them run \"delete-credentials.py\".\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false.")
+    if not username or not SAVE_CREDENTIALS:
+        username = secure_credential_input(colored(f"Enter your {web.name} username: ","light_blue"))
+        password = secure_credential_input(colored(f"Enter your {web.name} password: ","light_blue"))
+        clear_console()
+        if SAVE_CREDENTIALS:
+            credentials.save_credentials(web.name ,username, password)
+    
     page_number = get_numeric_input(colored("Enter number of pages: ", "light_blue"))
     return username, password, page_number
 
