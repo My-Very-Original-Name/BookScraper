@@ -3,14 +3,12 @@ import json
 from termcolor import colored
 def get_credentials(site: str):
     """Retrieve stored credentials for a site."""
-    # We can't list usernames in keyring, so you must know the username
-    # For this example, let's assume we use the first stored username we find
     try:
-        usernames = keyring.get_credential(site, None)  # Get first stored username
+        usernames = keyring.get_credential(site, None) 
         if usernames:
             return usernames.username, keyring.get_password(site, usernames.username)
         return None, None
-    except Exception as e:
+    except Exception:
         return None, None
 def delete_credentials(site: str):
     """Delete stored credentials for a site."""

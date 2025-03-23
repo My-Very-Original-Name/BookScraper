@@ -85,6 +85,7 @@ class Zanichelli(_Base_web):
         books = [[colored(str(i), "red"), btn.get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()] for i, btn in enumerate(buttons)]
 
         clear_console()
+        print(f"{colored("WARNING: ", "red")}books must already be set to double page mode and to the firts page")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(buttons) - 1)
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
@@ -249,7 +250,7 @@ class Bsmart(_Base_web):
             time.sleep(2)
             self.driver.find_element(By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll").click()
         except Exception as e:
-            print(e)
+            pass
     def _select_book(self):
         self.wait.until(EC.presence_of_element_located((By.LINK_TEXT, "BSMART BOOKS (new)"))).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
@@ -276,11 +277,61 @@ class Bsmart(_Base_web):
         self.driver.execute_script("arguments[0].click();", button)
     def turn_page(self):
         self.driver.find_element(By.CSS_SELECTOR, "button[title='Vai alla pagina successiva'].flex.justify-center.items-center.absolute").click()
+class Cambridge(_Base_web):
+    def __init__(self):
+        self.name = "Cambridge"
+    def start(self, username, password, resolution):
+        self._setup_driver("https://www.cambridge.org/go/login", resolution)
+        self._enter_credentials(username, password)
+        self._select_book()
+    def _enter_credentials(self, username, password):
+        self._accept_cookies()
+        time.sleep(1.5)
+        self.wait.until(EC.presence_of_element_located((By.ID, "gigya-loginID-75570100315269100"))).send_keys(username)
+        self.driver.find_elements(By.CLASS_NAME, "gigya-input-submit")[6].click()
+        self.wait.until(EC.presence_of_element_located((By.ID, "gigya-password-28556111034728640"))).send_keys(password)
+        self.driver.find_elements(By.CLASS_NAME, "gigya-input-submit")[6].click()
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "card-title")))
+    def _select_book(self):
+        clear_console()
+        print(f"{colored("WARNING: ", "red")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.\n{colored("WARNING: ", "red")} Supported books must be already set to DOUBLE PAGE MODE")
+        elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
+        books = [[colored(str(elements.index(element)), "red"), element.text]for element in elements]
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(books)-1)
+        self.book = elements[i].text
+        elements[i].click()
+        elements = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='section-grid']//*[contains(@class, 'font-weight-bold') and contains(@class, 'card-title') and contains(@class, 'text-body-1')]")))
+        books = [[colored(str(elements.index(element)), "red"), element.text]for element in elements]
+        clear_console()
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(books)-1)
+        self.book = self.book + elements[i].text
+        elements[i].click()
+        time.sleep(1.5)
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        print("Waiting for book to load...")
+        time.sleep(10)
+        clear_console()
+        try:
+            self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
+            self.wait.until(EC.presence_of_element_located((By.ID, "zoom-singlePage"))).click()
+        except Exception:
+            stop(1, "Not able to find test element, book may not be supported.")
+        
+    def turn_page(self):
+        self.driver.find_element(By.ID, "next-page-button").click()
+            
+    def _accept_cookies(self):
+        try:
+            self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
+        except Exception:
+            pass
 
 
 
 # ---- Global variables ----
-classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma(), Bsmart()]
+classes = [Zanichelli(), Hub_scuola(), Mylim(), Sanoma(), Bsmart(), Cambridge(),]
 pdf_merger = PdfMerger()
 credentials = Credentials()
 
@@ -306,10 +357,26 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
         except ValueError:
             print(colored("Invalid input. Please insert a numeric value.", "red"))
 
+
 # ---- Main area ----------
+def stop(code = 0, e = None):
+    if code == 0:
+        print(f"{colored("PDF saved: ", "green")} {OUTPUT_PDF_PATH}\nPress ENTER to exit")
+        web.quit()
+        exit(code)        
+    if code == 1:
+        print(f"{colored("ERROR: ", "red")}{e}")
+        web.quit()
+        try:
+            delete_temp_dir()
+        except Exception:
+            pass
+        input("Quitting... press ENTER to exit")
+        exit(1)
+        
 def get_configs():
     global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar, SAVE_CREDENTIALS
-    with open("configS.json", "r") as file:
+    with open("configs.json", "r") as file:
         f = json.load(file)
     OUTPUT_PDF_PATH = f["output-path"]
     CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
@@ -360,8 +427,8 @@ def secure_credential_input(prompt):
     return password.decode("utf-8")
 
 def input_handler():
-    username = ""
-    if  SAVE_CREDENTIALS:
+    username, password = credentials.get_credentials(web.name)
+    if  SAVE_CREDENTIALS and username:
         username, password = credentials.get_credentials(web.name)
         print(colored("Using saved credentials: ", "yellow")+" if you want to delete them run \"delete-credentials.py\".\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false.")
     if not username or not SAVE_CREDENTIALS:
@@ -398,7 +465,12 @@ def gen_pdf(img, x):
             temp_pdf.write(pdf_bytes)
         pdf_merger.append(temp_pdf_path)  
     except Exception as e:
-        print(f"{colored("ERR", "red")}: Failed to process image {x}: {e}")
+        print(f"\n{colored("ERR", "red")}: Failed to process image {x}: {e}")
+
+def delete_temp_dir():
+    pdf_merger.close()
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
 
 def main():
     global web, temp_dir, OUTPUT_PDF_PATH
@@ -428,9 +500,7 @@ def main():
             x += 1
     
     except Exception as e:
-        print(f"{colored("ERROR", "red")} An unexpected error occurred: {e}")
-        web.quit()
-        exit(1)
+        stop(1, f"An unexpected error occurred: {e}")
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
         if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
@@ -440,12 +510,10 @@ def main():
     with open(OUTPUT_PDF_PATH, "wb") as pdf_file:
         pdf_merger.write(pdf_file)
 
-    pdf_merger.close()
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir)
+    delete_temp_dir()
     web.quit()
     clear_console()
-    print(f"{colored("PDF saved: ", "green")} {OUTPUT_PDF_PATH}\nPress ENTER to exit")
+    stop()
 
 if __name__ == "__main__":
     main()
