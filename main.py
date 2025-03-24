@@ -25,17 +25,15 @@ import keyring
 # ---- Classes ----
 class Credentials():
     def save_credentials(self,site: str, username: str, password: str):
-        """Save credentials for a given site."""
         keyring.set_password(site, username, password)
 
     def get_credentials(self,site: str):
-        """Retrieve stored credentials for a site."""
         try:
             usernames = keyring.get_credential(site, None)  
             if usernames:
                 return usernames.username, keyring.get_password(site, usernames.username)
             else:
-                return None, None # no credential found
+                return None, None 
         except Exception as e:
             return None, None
 
@@ -78,7 +76,7 @@ class Zanichelli(_Base_web):
         try:
             self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
         except Exception:
-            pass  # No cookie popup detected
+            pass 
 
     def _select_book(self):
         buttons = self.driver.find_elements(By.CSS_SELECTOR, "button[aria-label*='LEGGI EBOOK']")

@@ -3,7 +3,7 @@
     "output-path": "output/",
     "bar-length": 50,
     "save-credentials": true,
-    "sites": ["Zanichelli(Booktab)","Hub-Scuola","Loescher(Mylim)","Sanoma","Bsmart"],
+    "sites": ["Zanichelli(Booktab)","Hub-Scuola","Loescher(Mylim)","Sanoma","Bsmart", "Cambridge"],
 
     "Zanichelli(Booktab)": {
         "resolution": [3840, 2160],
@@ -30,6 +30,11 @@
         "resolution": [3840, 2160],
         "sleep-page-seconds": 2,
         "cropping-rectangle": [1131, 78, 2694, 2048]
+    },
+    "Cambridge":{
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 2,
+        "cropping-rectangle": [1177, 96, 2651, 1954]
     }
 
 
