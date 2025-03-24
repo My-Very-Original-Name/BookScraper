@@ -492,7 +492,11 @@ def main():
         while x <= num_of_pages:
             time.sleep(SLEEP_PAGE_SECONDS)
             gen_pdf(get_img() ,x)
-            web.turn_page()
+            try:
+                web.turn_page()
+            except Exception as e:
+                print(f"{colored("ERROR: ", "red")}, could not turn page, compiling up to page {x}")
+                break
 
             progress_bar(x, num_of_pages)
             x += 1
