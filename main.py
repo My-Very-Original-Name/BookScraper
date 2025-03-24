@@ -392,11 +392,11 @@ def progress_bar(progress, total):
     percentage = round((100 * progress) / total, 1)
     etc = SLEEP_PAGE_SECONDS*(total -progress)
     if etc >= 3600:
-        etc_str = f"{etc // 3600} hours"
+        etc_str = f"{round(etc // 3600,1)} hours"
     elif etc >= 60:
-        etc_str = f"{etc // 60} minutes"
+        etc_str = f"{round(etc // 60,1)} minutes"
     else:
-        etc_str = f"{etc} seconds"
+        etc_str = f"{round(etc,1)} seconds"
     print(
         f"{colored('Scanning:', 'yellow')} {colored(f'{percentage}%', 'red')}  "
         f"{''.join(bar)} "
