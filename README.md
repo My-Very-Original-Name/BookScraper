@@ -29,7 +29,10 @@ BookScraper is Python script that automates the prosess of downloading and conve
 
 ### Installing
 
-* Download the repo
+* Clone the repo
+```
+git clone https://github.com/My-Very-Original-Name/BookScraper.git
+```
 * Install Dependencies 
 ``` 
 pip install -r requirements.txt
