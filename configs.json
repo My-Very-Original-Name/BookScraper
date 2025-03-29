@@ -33,7 +33,7 @@
     },
     "Cambridge":{
         "resolution": [3840, 2160],
-        "sleep-page-seconds": 2,
+        "sleep-page-seconds": 1.6,
         "cropping-rectangle": [1177, 96, 2651, 1954]
     }
 

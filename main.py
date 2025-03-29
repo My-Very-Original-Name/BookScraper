@@ -5,7 +5,6 @@ import time
 from PyPDF2 import PdfMerger
 import os
 import shutil
-import ctypes    
 from termcolor import colored
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -36,6 +35,13 @@ class Credentials():
                 return None, None 
         except Exception as e:
             return None, None
+    def delete_credentials(self, site: str):
+        username, _ = self.get_credentials(site)
+        if username:
+            keyring.delete_password(site, username)
+            print(f"Deleted credentials for {site}")
+        else:
+            print(f"No credentials to delete for {site}")
 
 class _Base_web():
     def take_screenshot(self):
@@ -380,8 +386,9 @@ def get_configs():
     CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
     SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
     SAVE_CREDENTIALS = f["save-credentials"]
-    bar = ["░" for i in range(f["bar-length"])] 
+    bar = ["░" for i in range(f["bar-length"])]
     return f[web.name]["resolution"] 
+
 
 def progress_bar(progress, total):
     max_icon = int((len(bar) * progress) / total)
@@ -426,12 +433,23 @@ def secure_credential_input(prompt):
 
 def input_handler():
     username, password = credentials.get_credentials(web.name)
+    deleted = False
     if  SAVE_CREDENTIALS and username:
         username, password = credentials.get_credentials(web.name)
-        print(colored("Using saved credentials: ", "yellow")+" if you want to delete them run \"delete-credentials.py\".\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false.")
-    if not username or not SAVE_CREDENTIALS:
-        username = secure_credential_input(colored(f"Enter your {web.name} username: ","light_blue"))
-        password = secure_credential_input(colored(f"Enter your {web.name} password: ","light_blue"))
+        if input(colored("NOTICE: ", "yellow")+ "using saved credentials: "+colored("if you want to delete them enter: \"d\"", "magenta")+"\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise: "+ colored("Press ENTER to continue ", "magenta")).lower() == "d":
+            credentials.delete_credentials(web.name)
+            clear_console()
+            print(colored("Credentials deleted successfully.\n", "green"))
+            deleted = True
+    if SAVE_CREDENTIALS and (not username or deleted):
+        print(f"{colored("NOTICE:", "yellow")} credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
+    if not username or not SAVE_CREDENTIALS or deleted:
+        while True:
+            username = secure_credential_input(colored(f"Enter your {web.name} username: ","light_blue"))
+            password = secure_credential_input(colored(f"Enter your {web.name} password: ","light_blue"))
+            if username and password: break
+            clear_console()
+            print(colored("Invalid credentials. Please try again.", "red"))
         clear_console()
         if SAVE_CREDENTIALS:
             credentials.save_credentials(web.name ,username, password)
