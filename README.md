@@ -41,7 +41,7 @@ pip install -r requirements.txt
 * Add an "output" folder
 
 **If using the pre-compiled exe**
-* Download the latest relase
+* Download the .zip from the latest relase
 * Add am "output" folder
 * Run the exe
 ### Executing program
