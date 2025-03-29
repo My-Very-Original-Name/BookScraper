@@ -26,6 +26,7 @@ BookScraper is Python script that automates the prosess of downloading and conve
 ### Dependencies
 - Python 3.7 or higher
 - Python packages: full list in *requirements.txt*
+- A supported browser (Firefox)
 
 ### Installing
 
