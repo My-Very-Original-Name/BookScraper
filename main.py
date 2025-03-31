@@ -510,7 +510,7 @@ def main():
     print("Starting...")
     try:
         web.start(username, password, resolution)
-        OUTPUT_PDF_PATH = "\\"+ OUTPUT_PDF_PATH + web.book + ".pdf"
+        OUTPUT_PDF_PATH =  OUTPUT_PDF_PATH + "\\"+ web.book + ".pdf"
         x = 0
         clear_console()
         while x <= num_of_pages:
