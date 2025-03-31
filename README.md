@@ -38,12 +38,9 @@ git clone https://github.com/My-Very-Original-Name/BookScraper.git
 ``` 
 pip install -r requirements.txt
 ```
-* Add an "output" folder
 
 **If using the pre-compiled exe**
-* Download the .zip from the latest relase
-* Add am "output" folder
-* Run the exe
+* Download and extract the .zip from the latest relase
 ### Executing program
 
 * Run *run.bat* or *Bookscraper.exe*
@@ -51,6 +48,7 @@ pip install -r requirements.txt
 ## Common issues
 * Not all Cambridge go books are Supported
 * Some sites require to manually reset the book page to 1 before running the program
+* The program will open a browser (it shouldn't but it still does), Do not resize the window. 
 
 
 
