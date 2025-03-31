@@ -369,9 +369,10 @@ def stop(code = 0, e = None):
         web.quit()
         exit(code)        
     if code == 1:
+        clear_console()
         print(f"{colored("ERROR: ", "red")}{e}")
-        web.quit()
         try:
+            web.quit()
             delete_temp_dir()
         except Exception:
             pass
@@ -380,13 +381,18 @@ def stop(code = 0, e = None):
         
 def get_configs():
     global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar, SAVE_CREDENTIALS
-    with open("configs.json", "r") as file:
-        f = json.load(file)
-    OUTPUT_PDF_PATH = f["output-path"]
-    CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
-    SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
-    SAVE_CREDENTIALS = f["save-credentials"]
-    bar = ["░" for i in range(f["bar-length"])]
+    try:
+        with open("configs.json", "r") as file:
+            f = json.load(file)
+        OUTPUT_PDF_PATH = f["output-path"]
+        CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
+        SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
+        SAVE_CREDENTIALS = f["save-credentials"]
+        bar = ["░" for i in range(f["bar-length"])]
+    except FileNotFoundError:
+        stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
+    except Exception as e:
+        stop(1, f"Error loading configuration file: {e}")
     return f[web.name]["resolution"] 
 
 
@@ -495,16 +501,16 @@ def main():
     print(f"{colored("Welcome to BookScraper!\n", "green")}")
     web = select_site()
     resolution = get_configs()
-    print(resolution)
     clear_console()
-    
+    if not os.path.exists(OUTPUT_PDF_PATH):
+        os.makedirs(OUTPUT_PDF_PATH)
     username, password, num_of_pages = input_handler()
     os.mkdir(temp_dir)
     clear_console()
     print("Starting...")
     try:
         web.start(username, password, resolution)
-        OUTPUT_PDF_PATH = OUTPUT_PDF_PATH + web.book + ".pdf"
+        OUTPUT_PDF_PATH = "\\"+ OUTPUT_PDF_PATH + web.book + ".pdf"
         x = 0
         clear_console()
         while x <= num_of_pages:

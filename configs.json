@@ -1,6 +1,6 @@
 {
     
-    "output-path": "output/",
+    "output-path": "output",
     "bar-length": 50,
     "save-credentials": true,
     "sites": ["Zanichelli(Booktab)","Hub-Scuola","Loescher(Mylim)","Sanoma","Bsmart", "Cambridge"],
@@ -18,7 +18,7 @@
     "Loescher(Mylim)":
     {
         "resolution": [3840, 2160],
-        "sleep-page-seconds": 1.5,
+        "sleep-page-seconds": 0.5,
         "cropping-rectangle": [1098,0,2725,2014]
     },
     "Sanoma": {
