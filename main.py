@@ -77,13 +77,22 @@ class Zanichelli(_Base_web):
 
         self.driver.find_element(By.CLASS_NAME, "z-button--container").click()
         self.wait.until(EC.presence_of_element_located((By.ID, "home")))
+        time.sleep(1)
 
     def _accept_cookies(self):
         try:
             self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
         except Exception:
             pass 
-
+    def _delete_devices(self):
+        try:
+            self.driver.find_element(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]")
+        except Exception as e:
+            stop(1, e)
+        if input(f"{colored("WARNING: ", "red")}Logged devices limit for the website reached. Do you want to remove the latest one to continue? (y,n): ").lower() == "n":
+            stop(1)
+        self.driver.find_element(By.XPATH, "//mat-icon[contains(@class, 'icon-C_notesdelete') and contains(@class, 'pageIcon')]").click()
+        self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[.//span[text()='ELIMINA']]"))).click()
     def _select_book(self):
         buttons = self.driver.find_elements(By.CSS_SELECTOR, "button[aria-label*='LEGGI EBOOK']")
         books = [[colored(str(i), "red"), btn.get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()] for i, btn in enumerate(buttons)]
@@ -95,7 +104,14 @@ class Zanichelli(_Base_web):
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
-        time.sleep(5)  
+        print("waiting for book to load...")
+        time.sleep(5)
+        try:
+            self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
+        except Exception:
+            clear_console()
+            self._delete_devices()
+        time.sleep(3)
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
 
     def turn_page(self):
@@ -363,14 +379,14 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
 
 
 # ---- Main area ----------
-def stop(code = 0, e = None):
-    if code == 0:
+def stop(exit_code = 0,error = None):
+    if exit_code == 0:
         print(f"{colored("PDF saved: ", "green")} {OUTPUT_PDF_PATH}\nPress ENTER to exit")
         web.quit()
-        exit(code)        
-    if code == 1:
+        exit(exit_code)        
+    if exit_code == 1:
         clear_console()
-        print(f"{colored("ERROR: ", "red")}{e}")
+        print(f"{colored("ERROR: ", "red")}{error}")
         try:
             web.quit()
             delete_temp_dir()
@@ -388,7 +404,7 @@ def get_configs():
         CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
         SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
         SAVE_CREDENTIALS = f["save-credentials"]
-        bar = ["░" for i in range(f["bar-length"])]
+        bar = [colored("░", "grey") for i in range(f["bar-length"])]
     except FileNotFoundError:
         stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
     except Exception as e:
@@ -460,7 +476,7 @@ def input_handler():
         if SAVE_CREDENTIALS:
             credentials.save_credentials(web.name ,username, password)
     
-    page_number = get_numeric_input(colored("Enter number of pages: ", "light_blue"))
+    page_number = get_numeric_input(colored("Enter number of pages: ", "light_blue"), min_val= 1)
     return username, password, page_number
 
 def select_site():
@@ -530,7 +546,7 @@ def main():
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
         if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
-            exit()
+            stop(1)
         clear_console()
     print("Merging PDFs...")
     with open(OUTPUT_PDF_PATH, "wb") as pdf_file:
