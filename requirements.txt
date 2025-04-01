@@ -1,7 +1,0 @@
-pillow
-img2pdf
-PyPDF2
-termcolor
-selenium
-tabulate
-keyring
