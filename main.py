@@ -21,6 +21,8 @@ import json
 import keyring
 
 
+import traceback
+
 # ---- Classes ----
 class Credentials():
     def save_credentials(self,site: str, username: str, password: str):
@@ -51,16 +53,51 @@ class _Base_web():
         self.driver.quit()
     def _setup_driver(self, url, resolution):
         options = Options()
-        options.headless = True
+        options.add_argument("--headless")  # Required for no-GUI
+        
+        # CRITICAL SETTINGS TO FIX RENDERING
+        options.set_preference("layout.css.devPixelsPerPx", "1.0")  # Disable DPI scaling
+        options.set_preference("browser.zoom.siteSpecific", False)  # Disable automatic zoom
+        options.set_preference("apz.allow_zooming", False)  # Block pinch-to-zoom
+        
         self.driver = webdriver.Firefox(options=options)
-        self.driver.set_window_size(resolution[0], resolution[1])
+        self.driver.set_window_size(resolution[0], resolution[1])  # e.g., 1920x1080
         self.driver.get(url)
+        self.driver.execute_script("""
+        // Lock zoom to 100%
+        document.body.style.zoom = '1';
+        
+        // Override window.onload
+        const originalOnLoad = window.onload;
+        window.onload = function() {
+            document.body.style.zoom = '1';
+            if (originalOnLoad) originalOnLoad.apply(this, arguments);
+        };
+        
+        // Override history API (for SPAs)
+        const originalPushState = history.pushState;
+        history.pushState = function() {
+            originalPushState.apply(this, arguments);
+            document.body.style.zoom = '1';
+        };
+        
+        // Add viewport meta tag
+        const meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0';
+        document.head.appendChild(meta);
+        """)
         self.wait = WebDriverWait(self.driver, 10)
     
 class Zanichelli(_Base_web):
 
     def __init__(self):
         self.name = "Zanichelli(Booktab)"
+    def _setup_driver(self, url, resolution):
+        self.driver = webdriver.Firefox()
+        self.driver.set_window_size(resolution[0], resolution[1])
+        self.driver.get(url)
+        self.wait = WebDriverWait(self.driver, 10)
 
     def start(self, username, password, resolution):
         self._setup_driver("https://my.zanichelli.it/", resolution)
@@ -112,6 +149,7 @@ class Zanichelli(_Base_web):
             clear_console()
             self._delete_devices()
         time.sleep(3)
+
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
 
     def turn_page(self):
@@ -321,7 +359,7 @@ class Cambridge(_Base_web):
         i = get_numeric_input("\nInsert book index: ", 0, len(books)-1)
         self.book = elements[i].text
         elements[i].click()
-        elements = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='section-grid']//*[contains(@class, 'font-weight-bold') and contains(@class, 'card-title') and contains(@class, 'text-body-1')]")))
+        elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "v-card__title")))
         books = [[colored(str(elements.index(element)), "red"), element.text]for element in elements]
         clear_console()
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
@@ -386,7 +424,8 @@ def stop(exit_code = 0,error = None):
         exit(exit_code)        
     if exit_code == 1:
         clear_console()
-        print(f"{colored("ERROR: ", "red")}{error}")
+        if error:
+            print(f"{colored("ERROR: ", "red")}{error}")
         try:
             web.quit()
             delete_temp_dir()
@@ -404,7 +443,7 @@ def get_configs():
         CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
         SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
         SAVE_CREDENTIALS = f["save-credentials"]
-        bar = [colored("░", "grey") for i in range(f["bar-length"])]
+        bar = ["░" for i in range(f["bar-length"])]
     except FileNotFoundError:
         stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
     except Exception as e:
@@ -542,7 +581,10 @@ def main():
             x += 1
     
     except Exception as e:
-        stop(1, f"An unexpected error occurred: {e}")
+        web.driver.get_screenshot_as_file("debug.png")
+        traceback.print_exc()
+        exit(1)
+
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
         if input(colored("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + colored(f"{OUTPUT_PDF_PATH}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
