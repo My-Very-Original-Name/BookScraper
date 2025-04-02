@@ -179,6 +179,7 @@ class Hub_scuola(_Base_web):
         elements = self.driver.find_elements(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
         buttons = self.driver.find_elements(By.XPATH, "//button//span[text()='Esplora']")
         books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
         self.book = elements[i].text
@@ -267,6 +268,7 @@ class Sanoma(_Base_web):
         elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "title")))
         books = [[colored(str(i), "red"), element.text] for i, element in enumerate(elements)]
         clear_console()
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page" )
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         self.driver.find_elements(By.CLASS_NAME, "button-open")[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
         editions = self.driver.find_elements(By.CLASS_NAME, "volume")
@@ -323,6 +325,7 @@ class Bsmart(_Base_web):
             elements_text.append(element.text)
         books = [[colored(str(i), "red"), title] for i, title in enumerate(titles)]
         clear_console()
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
         i = elements_text.index(titles[i])
@@ -352,7 +355,7 @@ class Cambridge(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "card-title")))
     def _select_book(self):
         clear_console()
-        print(f"{colored("WARNING: ", "red")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.\n{colored("WARNING: ", "red")} Supported books must be already set to DOUBLE PAGE MODE")
+        print(f"{colored("WARNING: ", "red")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.\n{colored("WARNING: ", "red")} Supported books must be already set to the first page")
         elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
         books = [[colored(str(elements.index(element)), "red"), element.text]for element in elements]
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
@@ -443,7 +446,7 @@ def get_configs():
         CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
         SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
         SAVE_CREDENTIALS = f["save-credentials"]
-        bar = ["░" for i in range(f["bar-length"])]
+        bar = [colored("░", "grey") for i in range(f["bar-length"])]
     except FileNotFoundError:
         stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
     except Exception as e:
@@ -549,6 +552,14 @@ def delete_temp_dir():
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+def try_turn(trie):
+    try:
+        web.turn_page()
+    except Exception:
+        if trie > 5: raise Exception
+        clear_console()
+        time.sleep(3)
+        try_turn(trie +1)
 def main():
     global web, temp_dir, OUTPUT_PDF_PATH
     temp_dir = f"temp_pdfs_{randint(0, 1000)}"
@@ -572,7 +583,7 @@ def main():
             time.sleep(SLEEP_PAGE_SECONDS)
             gen_pdf(get_img() ,x)
             try:
-                web.turn_page()
+                try_turn(0)
             except Exception as e:
                 print(f"{colored("ERROR: ", "red")}, could not turn page, compiling up to page {x}")
                 break
