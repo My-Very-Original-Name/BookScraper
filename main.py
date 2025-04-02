@@ -446,7 +446,7 @@ def get_configs():
         CROPPING_RECTANGLE = f[web.name]["cropping-rectangle"]
         SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
         SAVE_CREDENTIALS = f["save-credentials"]
-        bar = [colored("░", "grey") for i in range(f["bar-length"])]
+        bar = ["░" for i in range(f["bar-length"])]
     except FileNotFoundError:
         stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
     except Exception as e:
@@ -592,9 +592,7 @@ def main():
             x += 1
     
     except Exception as e:
-        web.driver.get_screenshot_as_file("debug.png")
-        traceback.print_exc()
-        exit(1)
+        stop(1, e)
 
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
