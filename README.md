@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ## Common issues
 * Not all Cambridge go books are Supported
 * Some sites require to manually reset the book page to 1 before running the program
-* The program will open a browser (it shouldn't but it still does), Do not resize the window. 
+* The program will open a browser when interacting with the zanichelli website, Do not close, resize or in some cases minimize (as it seems to occasionally break the rendering) the window
 
 
 
