@@ -30,6 +30,10 @@ BookScraper is Python script that automates the prosess of downloading and conve
 
 ### Installing
 
+**DIRECT INSTALLATION**
+* Download the executable (or zip folder for older versions) from the latest relase
+-------
+**MANUAL INSTALLATION**
 * Clone the repo
 ```
 git clone https://github.com/My-Very-Original-Name/BookScraper.git
@@ -39,11 +43,10 @@ git clone https://github.com/My-Very-Original-Name/BookScraper.git
 pip install -r requirements.txt
 ```
 
-**If using the pre-compiled exe**
-* Download and extract the .zip from the latest relase
+
 ### Executing program
 
-* Run *run.bat* or *Bookscraper.exe*
+* Run **run.bat** for the manual instalation or **Bookscraper.exe**
 
 ## Common issues
 * Not all Cambridge go books are Supported
@@ -59,4 +62,3 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 ## Future plans
 * Linux/mac Os support
 * Improved error handling
-
