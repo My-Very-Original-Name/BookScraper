@@ -439,6 +439,51 @@ def stop(exit_code = 0,error = None):
         
 def get_configs():
     global OUTPUT_PDF_PATH, CROPPING_RECTANGLE, SLEEP_PAGE_SECONDS, bar, SAVE_CREDENTIALS
+    if not os.path.exists("configs.json"):
+        default_config = {"output-path": "output",
+    "bar-length": 50,
+    "save-credentials": True,
+    "sites": [
+        "Zanichelli(Booktab)",
+        "Hub-Scuola",
+        "Loescher(Mylim)",
+        "Sanoma",
+        "Bsmart",
+        "Cambridge"
+    ],
+    "Zanichelli(Booktab)": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
+        "cropping-rectangle": [1189, 50, 2684, 2066]
+    },
+    "Hub-Scuola": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
+        "cropping-rectangle": [1212, 174, 2612, 1955]
+    },
+    "Loescher(Mylim)": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 0.5,
+        "cropping-rectangle": [1098, 0, 2725, 2014]
+    },
+    "Sanoma": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.5,
+        "cropping-rectangle": [1398, 26, 2894, 1977]
+    },
+    "Bsmart": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 2,
+        "cropping-rectangle": [1131, 78, 2694, 2048]
+    },
+    "Cambridge": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 1.6,
+        "cropping-rectangle": [1177, 96, 2651, 1954]
+    }} 
+        print(f"{colored("WARNING", "red")}: Missing configuration fil, generating new one...")
+        with open("configs.json", "w") as f:
+            json.dump(default_config, f, indent = 4)
     try:
         with open("configs.json", "r") as file:
             f = json.load(file)
@@ -447,8 +492,6 @@ def get_configs():
         SLEEP_PAGE_SECONDS = f[web.name]["sleep-page-seconds"]
         SAVE_CREDENTIALS = f["save-credentials"]
         bar = ["░" for i in range(f["bar-length"])]
-    except FileNotFoundError:
-        stop(1, f"Missing congiguration file: {colored("\"configs.json\"", "yellow")}")
     except Exception as e:
         stop(1, f"Error loading configuration file: {e}")
     return f[web.name]["resolution"] 
