@@ -6,22 +6,20 @@ from PyPDF2 import PdfMerger
 import os
 import shutil
 from termcolor import colored
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.firefox.options import Options
-from tabulate import tabulate
 from random import randint
 import msvcrt
 import sys
 import json
 import keyring
+import tkinter as tk
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
+from tabulate import tabulate
 
-
-import traceback
 
 # ---- Classes ----
 class Credentials():
@@ -44,7 +42,6 @@ class Credentials():
             print(f"Deleted credentials for {site}")
         else:
             print(f"No credentials to delete for {site}")
-
 class _Base_web():
     def take_screenshot(self):
         return self.driver.get_screenshot_as_png()
@@ -53,15 +50,14 @@ class _Base_web():
         self.driver.quit()
     def _setup_driver(self, url, resolution):
         options = Options()
-        options.add_argument("--headless")  # Required for no-GUI
+        options.add_argument("--headless")
         
-        # CRITICAL SETTINGS TO FIX RENDERING
-        options.set_preference("layout.css.devPixelsPerPx", "1.0")  # Disable DPI scaling
-        options.set_preference("browser.zoom.siteSpecific", False)  # Disable automatic zoom
-        options.set_preference("apz.allow_zooming", False)  # Block pinch-to-zoom
+        options.set_preference("layout.css.devPixelsPerPx", "1.0") 
+        options.set_preference("browser.zoom.siteSpecific", False)  
+        options.set_preference("apz.allow_zooming", False)  
         
         self.driver = webdriver.Firefox(options=options)
-        self.driver.set_window_size(resolution[0], resolution[1])  # e.g., 1920x1080
+        self.driver.set_window_size(resolution[0], resolution[1]) 
         self.driver.get(url)
         self.driver.execute_script("""
         // Lock zoom to 100%
@@ -88,7 +84,6 @@ class _Base_web():
         document.head.appendChild(meta);
         """)
         self.wait = WebDriverWait(self.driver, 10)
-    
 class Zanichelli(_Base_web):
 
     def __init__(self):
@@ -136,6 +131,7 @@ class Zanichelli(_Base_web):
 
         clear_console()
         print(f"{colored("WARNING: ", "red")}books must already be set to double page mode and to the firts page")
+        print(f"{colored("WARNING: ", "red")}do not resize, close or minimize the browser window")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
         i = get_numeric_input("\nInsert book index: ", 0, len(buttons) - 1)
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
@@ -154,8 +150,6 @@ class Zanichelli(_Base_web):
 
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.ID, "default_next_bttn"))).click()
-
-    
 class Hub_scuola(_Base_web):
     def __init__(self):
         self.name = "Hub-Scuola"
@@ -168,14 +162,16 @@ class Hub_scuola(_Base_web):
         clear_console()
         self._select_book()
         clear_console()
+        self._select_book2()
+        clear_console()
         self._select_edition()
     def _enter_credentials(self, username, password):
-        self.wait.until(EC.presence_of_element_located((By.ID, ":r6:"))).send_keys(username)
-        self.driver.find_element(By.ID, ":r7:").send_keys(password)
-        self.driver.find_elements(By.XPATH, "//button//span[text()='Accedi']")[1].click()
+        self.wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(username)
+        self.driver.find_element(By.NAME, "password").send_keys(password)
+        self.driver.find_elements(By.XPATH, "//button//span[text()='Accedi']")[0].click()
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A")))
     def _select_book(self):
-        time.sleep(2)
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")))
         elements = self.driver.find_elements(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
         buttons = self.driver.find_elements(By.XPATH, "//button//span[text()='Esplora']")
         books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
@@ -184,8 +180,16 @@ class Hub_scuola(_Base_web):
         i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
         self.book = elements[i].text
         buttons[i].click()
-        
-    
+    def _select_book2(self):
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "LA0in5eDCqmqYQn79QwT")))
+        elements = self.driver.find_elements(By.CLASS_NAME, "LA0in5eDCqmqYQn79QwT")
+        elements = elements[5:]
+        books = [[colored(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
+        print(f"""{colored("WARNING: ", "red")}The following selection might not only contain books, plase only select textbooks.\nselecting other items will result in unexpected behavior.\n""")
+        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        elements[i].click()
     def _select_edition(self):
         time.sleep(2)
         all_links = self.driver.find_elements(By.TAG_NAME, "a")
@@ -209,8 +213,7 @@ class Hub_scuola(_Base_web):
         except Exception:
             pass  
     def turn_page(self):
-        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.g-btn-page.g-btn-page--next"))).click()
-
+        self.wait.until(EC.presence_of_element_located((By.ID, "pspdfkit-next-page"))).click()
 class Mylim(_Base_web):
     def __init__(self):
         self.name = "Loescher(Mylim)"
@@ -241,7 +244,6 @@ class Mylim(_Base_web):
         
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page"))).click()
-
 class Sanoma(_Base_web):
     def __init__(self):
         self.name = "Sanoma"
@@ -254,8 +256,7 @@ class Sanoma(_Base_web):
         time.sleep(0.5)
         self._accept_cookies()
         self.driver.find_element(By.XPATH, "//button[@title='Accedi']").click()
-        time.sleep(2)
-        self.wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(password)
+        self.wait.until(EC.element_to_be_clickable((By.NAME, "password"))).send_keys(password)
         self.driver.find_element(By.NAME, "submit").click()
     def _accept_cookies(self):
         try:
@@ -265,24 +266,34 @@ class Sanoma(_Base_web):
             pass
     def _select_book(self):
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[@href='/prodotti_digitali']"))).click()
-        elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "title")))
-        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(elements)]
+        try:
+            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[title="Chiudi modale"]'))).click()
+        except Exception:
+            pass
+        self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "product-title")))
+        elements = self.driver.find_elements(By.CLASS_NAME, "product-title")
+        books = [[colored(i, "red"), element.text] for i, element in enumerate(elements)]
         clear_console()
-        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page" )
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
-        self.driver.find_elements(By.CLASS_NAME, "button-open")[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
-        editions = self.driver.find_elements(By.CLASS_NAME, "volume")
+        elements[get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
+        try:
+            elements = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'anno')]")))
+            options = [[colored(i, "red"), element.text] for i, element in enumerate(elements)]
+            clear_console()
+            print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
+            print(tabulate(options, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+            elements[get_numeric_input("\nInsert year index: ", 0, len(elements) - 1)].click()
+        except Exception:
+            pass
+        elements = self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.clamp-4.f-1.svelte-1wrsvtu")))
+        books = [[colored(i, "red"), element.text] for i, element in enumerate(elements)]
         clear_console()
-        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(editions)]
+        print(f"{colored("WARNING: ", "red")}Books must be already set to the first page")
         print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
-        editions[get_numeric_input("\nInsert book index: ", 0, len(editions) - 1)].click()
-        sub_editions = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//a[contains(@href, 'prodotti_digitali/libromedia')]")))
-        clear_console()
-        books = [[colored(str(i), "red"), element.text] for i, element in enumerate(sub_editions)]
-        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
-        i = get_numeric_input("\nInsert book index: ", 0, len(sub_editions) - 1)
-        self.book = sub_editions[i].text
-        sub_editions[i].click()
+        i = get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
+        elements[i].click()
+        self.book = elements[i].text
         self.driver.switch_to.window(self.driver.window_handles[1])
         clear_console()
         print("Waiting for book to load...")
@@ -292,8 +303,7 @@ class Sanoma(_Base_web):
         self.driver.find_element(By.ID, "page-field").send_keys("1")
         self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
     def turn_page(self):
-        self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
-
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
 class Bsmart(_Base_web):
     def __init__(self):
         self.name = "Bsmart"
@@ -370,13 +380,17 @@ class Cambridge(_Base_web):
         self.book = self.book + elements[i].text
         elements[i].click()
         time.sleep(1.5)
-        self.driver.switch_to.window(self.driver.window_handles[1])
+        self.driver.switch_to.window(self.driver.window_handles[-1])
         print("Waiting for book to load...")
         time.sleep(10)
         clear_console()
         try:
+            # Step 1: switch to parent iframe
+            self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "openpageIframe")))
+
+            # Step 2: switch to nested iframe inside parent iframe
             self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
-            self.wait.until(EC.presence_of_element_located((By.ID, "zoom-singlePage"))).click()
+            self.wait.until(EC.visibility_of_element_located((By.ID, "zoom-singlePage"))).click()
         except Exception:
             stop(1, "Not able to find test element, book may not be supported.")
         
@@ -388,7 +402,6 @@ class Cambridge(_Base_web):
             self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
         except Exception:
             pass
-
 
 
 # ---- Global variables ----
@@ -420,6 +433,167 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
 
 
 # ---- Main area ----------
+
+def get_crop_selection(image):
+    """
+    Opens a GUI to select cropping area from an image.
+    
+    Args:
+        image: PIL Image object
+        
+    Returns:
+        list: [left, top, right, bottom] crop coordinates, or None if cancelled (use default)
+    """
+ 
+    root = tk.Tk()
+    root.title("Select Cropping Area")
+    root.resizable(True, True)
+    root.geometry("800x650")
+    
+    main_frame = tk.Frame(root)
+    main_frame.pack(fill=tk.BOTH, expand=True)
+    
+    canvas = tk.Canvas(main_frame, bg='white', cursor="crosshair") 
+    canvas.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    clicks = []
+    rect_id = None
+    crop_rectangle = None
+    current_photo = None
+    current_scale_factor = 1.0
+    
+    def update_image():
+        nonlocal current_photo, current_scale_factor, rect_id
+        
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+        
+        if canvas_width <= 1 or canvas_height <= 1:
+            return 
+        
+        current_scale_factor = min(canvas_width / image.width, canvas_height / image.height)
+        display_size = (int(image.width * current_scale_factor), int(image.height * current_scale_factor))
+        
+        scaled_image = image.resize(display_size, Image.LANCZOS)
+        
+        img_bytes = io.BytesIO()
+        scaled_image.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        current_photo = tk.PhotoImage(data=img_bytes.getvalue())
+        
+        canvas.delete("all")
+        rect_id = None 
+        
+        img_x = (canvas_width - display_size[0]) // 2
+        img_y = (canvas_height - display_size[1]) // 2
+        
+        canvas.create_image(img_x, img_y, image=current_photo, anchor=tk.NW)
+        
+        clicks.clear()
+        confirm_btn.config(state=tk.DISABLED)
+        retry_btn.config(state=tk.DISABLED)
+    
+    def on_click(event):
+        nonlocal clicks, rect_id
+        
+        if not current_photo:
+            return
+        
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+        img_width = int(image.width * current_scale_factor)
+        img_height = int(image.height * current_scale_factor)
+        
+        img_x = (canvas_width - img_width) // 2
+        img_y = (canvas_height - img_height) // 2
+        
+        rel_x = event.x - img_x
+        rel_y = event.y - img_y
+        
+        if rel_x < 0 or rel_x >= img_width or rel_y < 0 or rel_y >= img_height:
+            return 
+        
+        if len(clicks) >= 2:
+            update_image()
+        
+        clicks.append((event.x, event.y))
+        
+        canvas.create_oval(event.x-3, event.y-3, event.x+3, event.y+3, fill='red', outline='red')
+        
+        if len(clicks) == 2:
+            x1, y1 = clicks[0]
+            x2, y2 = clicks[1]
+            
+            left = min(x1, x2)
+            top = min(y1, y2)
+            right = max(x1, x2)
+            bottom = max(y1, y2)
+            
+            rect_id = canvas.create_rectangle(left, top, right, bottom, outline='red', width=2, fill='', stipple='gray50')
+            confirm_btn.config(state=tk.NORMAL)
+            retry_btn.config(state=tk.NORMAL)
+    
+    def confirm():
+        nonlocal crop_rectangle
+        if len(clicks) == 2:
+            x1, y1 = clicks[0]
+            x2, y2 = clicks[1]
+            
+            canvas_width = canvas.winfo_width()
+            canvas_height = canvas.winfo_height()
+            img_width = int(image.width * current_scale_factor)
+            img_height = int(image.height * current_scale_factor)
+            img_x_offset = (canvas_width - img_width) // 2
+            img_y_offset = (canvas_height - img_height) // 2
+
+            orig_x1 = int((x1 - img_x_offset) / current_scale_factor)
+            orig_y1 = int((y1 - img_y_offset) / current_scale_factor)
+            orig_x2 = int((x2 - img_x_offset) / current_scale_factor)
+            orig_y2 = int((y2 - img_y_offset) / current_scale_factor)
+            
+            left = max(0, min(orig_x1, orig_x2))
+            top = max(0, min(orig_y1, orig_y2))
+            right = min(image.width, max(orig_x1, orig_x2))
+            bottom = min(image.height, max(orig_y1, orig_y2))
+            
+            crop_rectangle = [left, top, right, bottom]
+            root.destroy()
+    
+    def use_default():
+        nonlocal crop_rectangle
+        crop_rectangle = None
+        root.destroy()
+
+    def retry():
+        update_image()
+        
+    canvas.bind("<Button-1>", on_click)
+    
+    canvas.bind("<Configure>", lambda event: root.after_idle(update_image)) 
+    
+    instruction_label = tk.Label(root, text="Click two opposite corners to select cropping area")
+    instruction_label.pack()
+    
+    button_frame = tk.Frame(root)
+    button_frame.pack(pady=5)
+    
+    confirm_btn = tk.Button(button_frame, text="Confirm", command=confirm, state=tk.DISABLED)
+    confirm_btn.pack(side=tk.LEFT, padx=5)
+
+    retry_btn = tk.Button(button_frame, text="Retry", command=retry, state=tk.DISABLED)
+    retry_btn.pack(side=tk.LEFT, padx=5)
+    
+    use_default_btn = tk.Button(button_frame, text="Use Default", command=use_default)
+    use_default_btn.pack(side=tk.LEFT, padx=5)
+    
+    root.update_idletasks() 
+    update_image()
+    
+    root.mainloop()
+    
+    return crop_rectangle
+
+
 def stop(exit_code = 0,error = None):
     if exit_code == 0:
         print(f"{colored("PDF saved: ", "green")} {OUTPUT_PDF_PATH}\nPress ENTER to exit")
@@ -481,7 +655,7 @@ def get_configs():
         "sleep-page-seconds": 1.6,
         "cropping-rectangle": [1177, 96, 2651, 1954]
     }} 
-        print(f"{colored("WARNING", "red")}: Missing configuration fil, generating new one...")
+        print(f"{colored("WARNING", "red")}: Missing configuration file, generating new one...")
         with open("configs.json", "w") as f:
             json.dump(default_config, f, indent = 4)
     try:
@@ -499,7 +673,9 @@ def get_configs():
 
 def progress_bar(progress, total):
     max_icon = int((len(bar) * progress) / total)
-    
+    clear_console()
+    if web.name == "Zanichelli(Booktab)":
+        print(f"{colored("WARNING: ", "red")}do not resize, close or minimize the browser window")
     for i in range(max_icon):
         bar[i] = colored("█", "magenta")
 
@@ -590,11 +766,6 @@ def gen_pdf(img, x):
     except Exception as e:
         print(f"\n{colored("ERR", "red")}: Failed to process image {x}: {e}")
 
-def delete_temp_dir():
-    pdf_merger.close()
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir)
-
 def try_turn(trie):
     try:
         web.turn_page()
@@ -603,8 +774,15 @@ def try_turn(trie):
         clear_console()
         time.sleep(3)
         try_turn(trie +1)
+
+def delete_temp_dir():
+    pdf_merger.close()
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+
+
 def main():
-    global web, temp_dir, OUTPUT_PDF_PATH
+    global web, temp_dir, OUTPUT_PDF_PATH, CROPPING_RECTANGLE
     temp_dir = f"temp_pdfs_{randint(0, 1000)}"
     clear_console()
     print(f"{colored("Welcome to BookScraper!\n", "green")}")
@@ -619,6 +797,12 @@ def main():
     print("Starting...")
     try:
         web.start(username, password, resolution)
+        time.sleep(4)
+        clear_console()
+        print("Please continue in the new window, select two opposite cornsers of the page. (the window is resizable)")
+        cropping_rect = get_crop_selection(Image.open(io.BytesIO(web.take_screenshot())).convert('RGB'))
+        if cropping_rect: CROPPING_RECTANGLE = cropping_rect
+        
         OUTPUT_PDF_PATH =  OUTPUT_PDF_PATH + "\\"+ web.book + ".pdf"
         x = 0
         clear_console()
@@ -633,9 +817,8 @@ def main():
 
             progress_bar(x, num_of_pages)
             x += 1
-    
-    except Exception as e:
-        stop(1, e)
+    except Exception as err:
+        stop(1, err)
 
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):

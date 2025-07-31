@@ -4,3 +4,4 @@ termcolor
 selenium
 tabulate
 keyring
+Python-IO
