@@ -46,7 +46,7 @@ pip install -r requirements.txt
 
 ### Executing program
 
-**MANUAL INSTALLATION**: run main.py 
+- **MANUAL INSTALLATION**: run main.py 
 
 windows
 ```
@@ -56,7 +56,7 @@ Linux
 ```
 python3 main.py
 ``` 
-**DIRECT INSTALLATION**
+- **DIRECT INSTALLATION**
 
 run BookScraper.exe
 ## Common issues
