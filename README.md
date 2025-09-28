@@ -46,16 +46,28 @@ pip install -r requirements.txt
 
 ### Executing program
 
-* Run **run.bat** for the manual instalation or **Bookscraper.exe**
+**MANUAL INSTALLATION**: run main.py 
 
+windows
+```
+python main.py
+``` 
+Linux
+```
+python3 main.py
+``` 
+**DIRECT INSTALLATION**
+
+run BookScraper.exe
 ## Common issues
 * Not all Cambridge go books are Supported
 * Some sites require to manually reset the book page to 1 before running the program
-* The program will open a browser when interacting with the zanichelli website, Do not close, resize or in some cases minimize (as it seems to occasionally break the rendering) the window
+* The program might open a browser window when interacting with some websites, Do not close, resize or in some cases minimize it (occasionally breaks the rendering) 
 
 
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
+
 
