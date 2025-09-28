@@ -23,6 +23,7 @@ BookScraper is Python script that automates the prosess of downloading and conve
 - **Windows**
     - Windows 10+ (Fully supported)
     - Windows 7/8/8.1 (untested)
+- **Linux**
 ### Dependencies
 - Python 3.7 or higher
 - Python packages: full list in *requirements.txt*
@@ -58,7 +59,3 @@ pip install -r requirements.txt
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
-
-## Future plans
-* Linux/mac Os support
-* Improved error handling
