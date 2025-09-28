@@ -7,7 +7,6 @@ import os
 import shutil
 from termcolor import colored
 from random import randint
-import msvcrt
 import sys
 import json
 import keyring
@@ -19,6 +18,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options
 from tabulate import tabulate
+import getpass  # Add this for cross-platform password input
 
 
 # ---- Classes ----
@@ -125,6 +125,19 @@ class Zanichelli(_Base_web):
             stop(1)
         self.driver.find_element(By.XPATH, "//mat-icon[contains(@class, 'icon-C_notesdelete') and contains(@class, 'pageIcon')]").click()
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[.//span[text()='ELIMINA']]"))).click()
+        try:
+            self._single_page_mode()
+        except Exception as e:
+            stop(1, e)
+    def _single_page_mode(self):
+        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Impostazioni']"))).click()
+        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Vista pagina singola (Ctrl + Shift + V)']"))).click()
+        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Impostazioni']"))).click()
+    def check_for_bullshit_popup(self):
+        try:
+            self.driver.find_element((By.XPATH, "//button[normalize-space(text())='Chiudi']")).click()
+        except Exception: pass
+
     def _select_book(self):
         buttons = self.driver.find_elements(By.CSS_SELECTOR, "button[aria-label*='LEGGI EBOOK']")
         books = [[colored(str(i), "red"), btn.get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()] for i, btn in enumerate(buttons)]
@@ -140,16 +153,17 @@ class Zanichelli(_Base_web):
         print("waiting for book to load...")
         time.sleep(5)
         try:
-            self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
+            self._single_page_mode()
         except Exception:
             clear_console()
             self._delete_devices()
         time.sleep(3)
 
-        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Vista pagina singola (Ctrl + Shift + V)']"))).click()
 
     def turn_page(self):
-        self.wait.until(EC.presence_of_element_located((By.ID, "default_next_bttn"))).click()
+        self.check_for_bullshit_popup()
+        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Avanti']"))).click()
+
 class Hub_scuola(_Base_web):
     def __init__(self):
         self.name = "Hub-Scuola"
@@ -214,6 +228,8 @@ class Hub_scuola(_Base_web):
             pass  
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.ID, "pspdfkit-next-page"))).click()
+    def check_load(self):
+        self.wait.until(EC.element_to_be_clickable((By.ID, "pspdfkit-next-page")))
 class Mylim(_Base_web):
     def __init__(self):
         self.name = "Loescher(Mylim)"
@@ -322,7 +338,7 @@ class Bsmart(_Base_web):
         except Exception as e:
             pass
     def _select_book(self):
-        self.wait.until(EC.presence_of_element_located((By.LINK_TEXT, "BSMART BOOKS (new)"))).click()
+        self.wait.until(EC.presence_of_element_located((By.LINK_TEXT, "BSMART BOOKS"))).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/books/')]")))
         self._accept_cookies()
@@ -694,25 +710,8 @@ def progress_bar(progress, total):
         end="\r"
     )
 def secure_credential_input(prompt):
-    print(prompt, end='', flush=True)
-    password = b""
-    
-    while True:
-        char = msvcrt.getch()
-        
-        if char in {b"\r", b"\n"}: 
-            print("")
-            break
-        elif char == b"\b":  
-            password = password[:-1]
-            print("\b \b", end='', flush=True)
-        elif char == b"\x03": 
-            raise KeyboardInterrupt
-        else:
-            password += char
-            print("*", end='', flush=True) 
-
-    return password.decode("utf-8")
+    # Use getpass for cross-platform secure input
+    return getpass.getpass(prompt)
 
 def input_handler():
     username, password = credentials.get_credentials(web.name)
@@ -796,18 +795,27 @@ def main():
     clear_console()
     print("Starting...")
     try:
+        pass
+    except Exception: pass
+    if True:
         web.start(username, password, resolution)
         time.sleep(4)
         clear_console()
         print("Please continue in the new window, select two opposite cornsers of the page. (the window is resizable)")
-        cropping_rect = get_crop_selection(Image.open(io.BytesIO(web.take_screenshot())).convert('RGB'))
+        #if web.name == "Hub-Scuola":
+            #web.check_load()
+        img = Image.open(io.BytesIO(web.take_screenshot())).convert('RGB')
+        cropping_rect = get_crop_selection(img)
         if cropping_rect: CROPPING_RECTANGLE = cropping_rect
         
-        OUTPUT_PDF_PATH =  OUTPUT_PDF_PATH + "\\"+ web.book + ".pdf"
+        # Use os.path.join for cross-platform path
+        OUTPUT_PDF_PATH = os.path.join(OUTPUT_PDF_PATH, web.book + ".pdf")
         x = 0
         clear_console()
         while x <= num_of_pages:
             time.sleep(SLEEP_PAGE_SECONDS)
+            if web.name == "Zanichelli(Booktab)":
+                web.check_for_bullshit_popup()
             gen_pdf(get_img() ,x)
             try:
                 try_turn(0)
@@ -817,8 +825,8 @@ def main():
 
             progress_bar(x, num_of_pages)
             x += 1
-    except Exception as err:
-        stop(1, err)
+    #except Exception as err:
+    #    stop(1, err)
 
     clear_console()
     if os.path.exists(OUTPUT_PDF_PATH):
