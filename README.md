@@ -21,8 +21,6 @@ BookScraper is Python script that automates the prosess of downloading and conve
 ## Getting Started
 ### Supported platforms
 - **Windows**
-    - Windows 10+ (Fully supported)
-    - Windows 7/8/8.1 (untested)
 - **Linux**
 ### Dependencies
 - Python 3.7 or higher
