@@ -3,8 +3,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
-import utils
-from base import _Base_web
+from Scraper import utils
+from .base import _Base_web
 
 class Sanoma(_Base_web):
     def __init__(self):

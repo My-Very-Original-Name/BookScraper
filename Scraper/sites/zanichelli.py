@@ -4,8 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
-from base import _Base_web
-import utils
+from Scraper import utils
+from .base import _Base_web
 
 class Zanichelli(_Base_web):
 

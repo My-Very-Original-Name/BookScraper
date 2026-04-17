@@ -31,7 +31,7 @@ def color(string:str, color:str):
     }
     if color not in ansi_colors.keys():
         raise ValueError("Invalid color")
-    return ansi_colors[color] + string + ansi_colors["reset"]
+    return ansi_colors[color] + str(string) + ansi_colors["reset"]
 
 def clear_console():
     os.system("cls" if os.name == "nt" else "clear")

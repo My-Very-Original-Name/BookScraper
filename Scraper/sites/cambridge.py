@@ -2,8 +2,8 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-import utils
-from base import _Base_web
+from Scraper import utils
+from .base import _Base_web
 
 class Cambridge(_Base_web):
     def __init__(self):
