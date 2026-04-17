@@ -2,7 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from tabulate import tabulate
 import time
 #local imports
 from base import _Base_web
@@ -69,7 +68,7 @@ class Zanichelli(_Base_web):
         utils.clear_console()
         print(f"{utils.colored("WARNING:  ", "yellow")}books must already be set to double page mode and to the firts page")
         print(f"{utils.colored("WARNING:  ", "yellow")}do not resize, close or minimize the browser window")
-        print(tabulate(books, headers=['Index', 'Name'], tablefmt='pipe', colalign=("center", "center")))
+        print(utils.selector_table(books))
         i = utils.get_numeric_input("\nInsert book index: ", 0, len(buttons) - 1)
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
         buttons[i].click()

@@ -1,4 +1,5 @@
 import os
+import tabulate
 
 def color(string:str, color:str):
     """
@@ -51,3 +52,18 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
             print(color(f"Invalid input:", "red") + f"Please enter a value between {min_val} and {max_val}.")
         except ValueError:
             print(color("Invalid input:") + "Please insert a numeric value.")
+
+def selector_table(items, header:str = "Name"):
+    print(tabulate(items, headers=['Index', header], tablefmt='pipe', colalign=("center", "center")))
+
+def stop(web, error_text:str =None):
+    clear_console()
+    try:
+        web.quit()
+    except Exception:
+        print(color("ERROR:  ", "red") + f"Failed to stop web component correctly")
+    if error_text:
+        print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")
+        input("Quitting... press ENTER to exit")
+        exit(1)
+    exit(0)
