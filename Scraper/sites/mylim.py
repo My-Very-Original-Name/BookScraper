@@ -39,3 +39,6 @@ class Mylim(_Base_web):
         print("Waiting for book to load...")
         time.sleep(15)
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page")))
+    
+    def turn_page(self):
+        self.wait.until(EC.presence_of_element_located((By.NAME, "next-page"))).click()

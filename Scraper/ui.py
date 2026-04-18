@@ -170,7 +170,7 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     if web_name == "Zanichelli(Booktab)":
         print(f"{utils.color("WARNING:  ", "yellow")}Do not resize, close or minimize the browser window")
     for i in range(max_icon):
-        bar[i] = utils.color("█", "magenta")
+        bar[i] = utils.color("█", "purple")
 
     percentage = round((100 * progress) / total, 1)
     etc = sleep_page_seconds*(total -progress)

@@ -54,7 +54,7 @@ def get_numeric_input(prompt, min_val=0, max_val=None):
             print(color("Invalid input:") + "Please insert a numeric value.")
 
 def selector_table(items, header:str = "Name"):
-    print(tabulate(items, headers=['Index', header], tablefmt='pipe', colalign=("center", "center")))
+    print(tabulate.tabulate(items, headers=['Index', header], tablefmt='pipe', colalign=("center", "center")))
 
 def stop(web, error_text:str =None):
     clear_console()

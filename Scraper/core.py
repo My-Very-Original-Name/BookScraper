@@ -36,8 +36,9 @@ def gen_pdf(img, x, temp_dir):
 def try_turn(trye):
     try:
         web.turn_page()
-    except Exception:
-        if trye > 5: raise Exception
+    except Exception as e:
+        if trye > 5:
+            raise Exception(e)
         time.sleep(3)
         try_turn(trye +1)
 
@@ -53,9 +54,10 @@ def startup():
         web.start(username, password, configs["resolution"])
     except Exception as e:
         utils.stop(web, f"Unexpected error while starting: {e}")
-    page_number = utils.get_numeric_input(utils.color(f"Enter number of pages for '{web.book}': ", "blue"), min_val= 1)
-    if not os.path.exists(configs["output-path"]):
-        os.makedirs(configs["output-path"])
+    utils.clear_console()
+    page_number = utils.get_numeric_input(utils.color("Enter number of pages for '", "blue") + f"{web.book}" + utils.color("': ", "blue"), min_val= 1)
+    if not os.path.exists(configs["output_path"]):
+        os.makedirs(configs["output_path"])
     utils.clear_console()
     return configs, page_number
 
@@ -74,7 +76,8 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
     current_page = 0
     bar = configs["bar"]
     temp_dir = f"{configs["output_path"]}/{web.book}_tmp"
-    while current_page <= num_of_pages:
+    os.mkdir(temp_dir)
+    while current_page < num_of_pages:
         time.sleep(configs["sleep_page_seconds"])
         if web.name == "Zanichelli(Booktab)":  
             web.check_for_bullshit_popup()
@@ -83,15 +86,16 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
             try_turn(0)
         except Exception:
             print(f"{utils.color("ERROR:  ", "red")}could not turn page, compiling up to page {current_page}")
+            time.sleep(2)
             break
-        ui.progress_bar(bar, current_page, num_of_pages, web.name, configs["sleep_page_seconds"])
         current_page += 1
+        bar = ui.progress_bar(bar, current_page, num_of_pages, web.name, configs["sleep_page_seconds"])
     utils.clear_console()
 
 def save_pdf(configs):
     utils.clear_console()
-    output_path = configs["output-path"]
-    temp_path = f"{output_path}/{web.book}_temp"
+    output_path = configs["output_path"]
+    temp_path = f"{output_path}/{web.book}_tmp"
     output_file = f"{output_path}/{web.book}.pdf"
     if os.path.exists(output_file):
         if input(utils.color("WARNING:  ", "red") + f" A file with the same name as the output already exists!: " + utils.color(f"{output_file}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
@@ -99,8 +103,8 @@ def save_pdf(configs):
         utils.clear_console()
     print("Merging PDFs...")
     with open(output_file, "wb") as file:
-        pdf_merger(file)
-    
+        pdf_merger.write(file)
+    print(utils.color(f"Succesfully saved pdf to: ", "green") + output_file)
     pdf_merger.close()
     if os.path.exists(temp_path):
         shutil.rmtree(temp_path)
@@ -110,7 +114,7 @@ def main():
     cropping_rect = get_accurate_crop(configs["cropping_rectangle"])
     core_loop(page_number, configs, cropping_rect)
     save_pdf(configs)
-    utils.stop()
+    utils.stop(web)
 
 if __name__ == "__main__":
     try:
