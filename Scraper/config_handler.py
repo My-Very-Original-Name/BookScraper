@@ -51,7 +51,7 @@ def get_configs(name:str):
         "sleep-page-seconds": 1.6,
         "cropping-rectangle": [1177, 96, 2651, 1954]
     }} 
-        print(f"{color("WARNING:  ", "yellow")}: Missing configuration file, generating new one...")
+        print(f"{color("WARNING: ", "yellow")}: Missing configuration file, generating new one...")
         with open("configs.json", "w") as f:
             json.dump(default_config, f, indent = 4)
     try:

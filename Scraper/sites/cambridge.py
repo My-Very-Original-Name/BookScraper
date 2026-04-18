@@ -25,8 +25,8 @@ class Cambridge(_Base_web):
     
     def _select_book(self):
         utils.clear_console()
-        print(f"""{utils.color("WARNING:  ", "yellow")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.
-              {utils.color("WARNING:  ", "yellow")} Supported books must be already set to the first page""")
+        print(f"""{utils.color("WARNING: ", "yellow")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.
+{utils.color("WARNING: ", "yellow")} Supported books must be already set to the first page""")
         elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
         books = [[utils.color(str(elements.index(element)), "red"), element.text]for element in elements]
         print(utils.selector_table(books))
@@ -42,6 +42,7 @@ class Cambridge(_Base_web):
         elements[i].click()
         time.sleep(1.5)
         self.driver.switch_to.window(self.driver.window_handles[-1])
+        utils.clear_console()
         print("Waiting for book to load...")
         time.sleep(10)
         utils.clear_console()

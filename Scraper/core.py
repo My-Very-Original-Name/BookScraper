@@ -45,7 +45,7 @@ def try_turn(trye):
 def startup():
     global web
     utils.clear_console()
-    print(f"{utils.color("Welcome to BookScraper!\n", "green")}")
+    print(f"{utils.color("Welcome to BookScraper!", "green")}")
     web = select_site(config_handler.load_site_list())
     configs = config_handler.get_configs(web.name)
     print("Starting...")
@@ -76,8 +76,11 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
     current_page = 0
     bar = configs["bar"]
     temp_dir = f"{configs["output_path"]}/{web.book}_tmp"
-    os.mkdir(temp_dir)
+    if not os.path.exists(temp_dir):
+        os.mkdir(temp_dir)
     while current_page < num_of_pages:
+        if os.path.exists(f"{temp_dir}/temp_{current_page}.pdf"):
+            os.remove(f"{temp_dir}/temp_{current_page}.pdf")
         time.sleep(configs["sleep_page_seconds"])
         if web.name == "Zanichelli(Booktab)":  
             web.check_for_bullshit_popup()
@@ -98,16 +101,18 @@ def save_pdf(configs):
     temp_path = f"{output_path}/{web.book}_tmp"
     output_file = f"{output_path}/{web.book}.pdf"
     if os.path.exists(output_file):
-        if input(utils.color("WARNING:  ", "red") + f" A file with the same name as the output already exists!: " + utils.color(f"{output_file}", "yellow") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
+        if input(utils.color("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + utils.color(f"'{output_file}'", "bold_white") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
             utils.stop(web)
         utils.clear_console()
     print("Merging PDFs...")
     with open(output_file, "wb") as file:
         pdf_merger.write(file)
-    print(utils.color(f"Succesfully saved pdf to: ", "green") + output_file)
+    utils.clear_console()
+    print(utils.color(f"Succesfully saved pdf to: ", "green") + utils.color(output_file, "bold_white"))
     pdf_merger.close()
     if os.path.exists(temp_path):
         shutil.rmtree(temp_path)
+    input(f"Press {utils.color("ENTER", "bold_white")} to exit")
 
 def main():
     configs, page_number = startup()

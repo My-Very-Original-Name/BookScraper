@@ -27,26 +27,32 @@ class Hub_scuola(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A")))
     
     def _select_book(self):
-        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")))
-        elements = self.driver.find_elements(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
-        buttons = self.driver.find_elements(By.XPATH, "//button//span[text()='Esplora']")
-        books = [[utils.color(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
-        print(f"{utils.color("WARNING:  ", "yellow")}Books must be already set to the first page")
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "XZWhLi22KkhBjwHCUUyw")))
+        containers = self.driver.find_elements(By.CLASS_NAME, "XZWhLi22KkhBjwHCUUyw")
+        books = []
+        buttons = []
+        for i, item in enumerate(containers):
+            title_el = item.find_element(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
+            button_el = item.find_element(By.XPATH, ".//a[.//span[contains(text(), 'Esplora')]]")
+            books.append([utils.color(str(i), "red"), title_el.text[:50]])
+            buttons.append(button_el)
+
+        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
         print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
-        self.book = elements[i].text
-        buttons[i].click()
+        choice = utils.get_numeric_input("\nInsert book index: ", 0, len(books) - 1)
+        self.book = books[choice][1]
+        buttons[choice].click()
     
     def _select_book2(self):
-        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "LA0in5eDCqmqYQn79QwT")))
-        elements = self.driver.find_elements(By.CLASS_NAME, "LA0in5eDCqmqYQn79QwT")
-        elements = elements[5:]
-        books = [[utils.color(str(elements.index(element)), "red"), element.text[:50]]for element in elements]
-        print(f"{utils.color("WARNING:  ", "yellow")}Books must be already set to the first page")
-        print(f"""{utils.color("WARNING: ", "yellow")}The following selection might not only contain books, plase only select textbooks.\nselecting other items will result in unexpected behavior.\n""")
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
-        elements[i].click()
+        selector = "swiper-container .LA0in5eDCqmqYQn79QwT"
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+        elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+        books_elements = [e for e in elements if "CONTENUTI DI ESEMPIO" not in e.text.upper()]
+        books_table = [[utils.color(str(i), "red"), e.text[:50]] for i, e in enumerate(books_elements)]
+        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
+        print(utils.selector_table(books_table))
+        i = utils.get_numeric_input("\nInsert book index: ", 0, len(books_elements) - 1)
+        books_elements[i].click()
     
     def _select_edition(self):
         time.sleep(2)
@@ -59,6 +65,7 @@ class Hub_scuola(_Base_web):
                 if svg_elements:  
                     first_type_links.append(link)
         books = [[utils.color(str(first_type_links.index(element)), "red"), element.text[:50]]for element in first_type_links]
+        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
         print(utils.selector_table(books))
         i = utils.get_numeric_input("\nInsert book index: ", 0, len(first_type_links) - 1)
         first_type_links[i].click()

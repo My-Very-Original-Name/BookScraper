@@ -44,7 +44,7 @@ class Zanichelli(_Base_web):
             self.driver.find_element(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]")
         except Exception as e:
             utils.stop(self, e)
-        if input(f"{utils.color("WARNING:  ", "yellow")}Logged devices limit for the website reached. Do you want to remove the latest one to continue? (y,n): ").lower() == "n":
+        if input(f"{utils.color("WARNING: ", "yellow")}Logged devices limit for the website reached. Do you want to remove the latest one to continue? (y,n): ").lower() == "n":
             utils.stop(self,e)
         self.driver.find_element(By.XPATH, "//mat-icon[contains(@class, 'icon-C_notesdelete') and contains(@class, 'pageIcon')]").click()
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[.//span[text()='ELIMINA']]"))).click()
@@ -62,17 +62,22 @@ class Zanichelli(_Base_web):
         except Exception: pass
 
     def _select_book(self):
-        buttons = self.driver.find_elements(By.CSS_SELECTOR, "button[aria-label*='LEGGI EBOOK']")
-        books = [[utils.color(str(i), "red"), btn.get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()] for i, btn in enumerate(buttons)]
+        buttons = self.driver.find_elements(By.CSS_SELECTOR, "z-button a[aria-label*='LEGGI EBOOK']")
+        books = []
+        for i, btn in enumerate(buttons):
+            full_label = btn.get_attribute("aria-label")
+            clean_title = full_label.split("LEGGI EBOOK")[-1].split(",")[0].strip()       
+            books.append([utils.color(str(i), "red"), clean_title])
 
         utils.clear_console()
-        print(f"{utils.colored("WARNING:  ", "yellow")}books must already be set to double page mode and to the firts page")
-        print(f"{utils.colored("WARNING:  ", "yellow")}do not resize, close or minimize the browser window")
+        print(f"{utils.color("WARNING: ", "yellow")}books must already be set to double page mode and to the firts page")
+        print(f"{utils.color("WARNING: ", "yellow")}do not resize, close or minimize the browser window")
         print(utils.selector_table(books))
         i = utils.get_numeric_input("\nInsert book index: ", 0, len(buttons) - 1)
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
+        utils.clear_console()
         print("waiting for book to load...")
         time.sleep(5)
         try:

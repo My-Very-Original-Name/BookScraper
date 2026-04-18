@@ -34,40 +34,51 @@ class Sanoma(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[@href='/prodotti_digitali']"))).click()
         try:
             self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[title="Chiudi modale"]'))).click()
-        except Exception:
+        except:
             pass
-        self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "product-title")))
+
+        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-title")))
         elements = self.driver.find_elements(By.CLASS_NAME, "product-title")
-        books = [[utils.color(i, "red"), element.text] for i, element in enumerate(elements)]
-        utils.clear_consoleclear_console()
-        print(f"{utils.color("WARNING:  ", "yellow")}Books must be already set to the first page")
-        print(utils.selector_table(books))
-        elements[utils.get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)].click()
-        try:
-            elements = self.wait.until(EC.presence_of_all_elements_located((By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'anno')]")))
-            options = [[utils.colored(i, "red"), element.text] for i, element in enumerate(elements)]
-            utils.clear_console()
-            print(f"{utils.color("WARNING: ", "red")}Books must be already set to the first page")
-            print(utils.selector_table(options))
-            elements[utils.get_numeric_input("\nInsert year index: ", 0, len(elements) - 1)].click()
-        except Exception:
-            pass
-        elements = self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.clamp-4.f-1.svelte-1wrsvtu")))
-        books = [[utils.color(i, "red"), element.text] for i, element in enumerate(elements)]
+        books_elements = [e for e in elements if len(e.text.strip()) > 0]
+        
+        books_table = [[utils.color(i, "red"), e.text] for i, e in enumerate(books_elements)]
         utils.clear_console()
-        print(f"{utils.color("WARNING:  ", "yellow")}Books must be already set to the first page")
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
-        elements[i].click()
-        self.book = elements[i].text
-        self.driver.switch_to.window(self.driver.window_handles[1])
+        print(utils.selector_table(books_table)) 
+        idx = utils.get_numeric_input("\nInsert book index: ", 0, len(books_elements) - 1)
+        target_book_element = books_elements[idx]
+        self.book = target_book_element.text
+        target_book_element.click()
+        try:
+            try:
+                annuity_selector = "ul.annuities-list li.annuity button"
+                self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".annuities-list")))
+                annuities = self.driver.find_elements(By.CSS_SELECTOR, annuity_selector)   
+                if annuities:
+                    annuity_table = [[utils.color(i, "red"), a.text.strip()] for i, a in enumerate(annuities)]
+                    utils.clear_console()
+                    print(utils.selector_table(annuity_table))
+                    a_idx = utils.get_numeric_input("\nSeleziona l'anno: ", 0, len(annuities) - 1)
+                    annuities[a_idx].click()
+            except:
+                pass
+            volume_selector = "div.clamp-4" 
+            self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, volume_selector)))
+            vols = self.driver.find_elements(By.CSS_SELECTOR, volume_selector)
+            vol_table = [[utils.color(i, "red"), v.text.strip()] for i, v in enumerate(vols)]
+            utils.clear_console()
+            print(utils.selector_table(vol_table))     
+            v_idx = utils.get_numeric_input("\nInsert volume/year index: ", 0, len(vols) - 1)
+            vols[v_idx].click()
+        except Exception as e:
+            utils.stop(self, f"Errore nella selezione volume: {e}")
+        self.driver.switch_to.window(self.driver.window_handles[-1])
         utils.clear_console()
         print("Waiting for book to load...")
-        time.sleep(7)
         self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
-        self.driver.find_element(By.CSS_SELECTOR, "span.icon.icon-page-single").click()
-        self.driver.find_element(By.ID, "page-field").send_keys("1")
-        self.driver.find_element(By.ID, "page-field").send_keys(Keys.ENTER)
+        try:
+            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Pagina singola']"))).click()
+        except:
+            pass
     
     def turn_page(self):
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@class, 'turn-page right')]"))).click()
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Pagina seguente']"))).click()

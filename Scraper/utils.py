@@ -57,12 +57,13 @@ def selector_table(items, header:str = "Name"):
     print(tabulate.tabulate(items, headers=['Index', header], tablefmt='pipe', colalign=("center", "center")))
 
 def stop(web, error_text:str =None):
-    clear_console()
     try:
         web.quit()
     except Exception:
+        clear_console()
         print(color("ERROR:  ", "red") + f"Failed to stop web component correctly")
     if error_text:
+        clear_console()
         print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")
         input("Quitting... press ENTER to exit")
         exit(1)

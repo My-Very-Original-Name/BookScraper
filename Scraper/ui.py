@@ -165,25 +165,29 @@ def get_crop_selection(image):
 
 
 def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
-    max_icon = int((len(bar) * progress) / total)
-    utils.clear_console()
+    raw_fill = (len(bar) * progress) / total
+    max_icon = int(raw_fill)
+    decimal_part = raw_fill % 1
+    utils.clear_console() 
     if web_name == "Zanichelli(Booktab)":
-        print(f"{utils.color("WARNING:  ", "yellow")}Do not resize, close or minimize the browser window")
+        print(f"{utils.color('WARNING:  ', 'yellow')}Do not resize, close or minimize the browser window")
     for i in range(max_icon):
         bar[i] = utils.color("█", "purple")
-
+    if decimal_part >= 0.5 and max_icon < len(bar):
+        bar[max_icon] = utils.color("▒", "bold_white")
     percentage = round((100 * progress) / total, 1)
-    etc = sleep_page_seconds*(total -progress)
+    etc = sleep_page_seconds * (total - progress)
     if etc >= 3600:
-        etc_str = f"{round(etc / 3600,1)} hours"
+        etc_str = f"{round(etc / 3600, 1)} hours"
     elif etc >= 60:
-        etc_str = f"{round(etc / 60,1)} minutes"
+        etc_str = f"{round(etc / 60, 1)} minutes"
     else:
-        etc_str = f"{round(etc,1)} seconds"
+        etc_str = f"{round(etc, 1)} seconds"
     print(
         f"{utils.color('Scanning:', 'blue')} {utils.color(f'{percentage}%', 'bold_green')}  "
         f"{''.join(bar)} "
-        f"[ {utils.color(progress, 'yellow')} / {utils.color(total, 'yellow')} ] pages - {utils.color("ETC: ", "blue")}{utils.color(etc_str, "bold_white")}       ",
+        f"[ {utils.color(progress, 'yellow')} / {utils.color(total, 'yellow')} ] pages - "
+        f"{utils.color('ETC: ', 'blue')}{utils.color(etc_str, 'bold_white')}       ",
         end="\r"
     )
     return bar
