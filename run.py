@@ -4,6 +4,7 @@ import shutil
 import zipfile
 import io
 import sys
+import json
 
 REPO = "My-Very-Original-Name/BookScraper"
 VERSION_FILE = "version.txt"
@@ -15,7 +16,11 @@ def check_updates():
     if "--post-update" in sys.argv:
         sys.argv.remove("--post-update")
         return
-
+    if os.path.exists("configs.json"):
+        with open("configs.json", "r") as f:
+            data = json.load(f)
+        if data["check-for-updates"] == False:
+            return
     try:
         clear_screen()
         print("Checking for updates...")

@@ -2,6 +2,7 @@
     "output-path": "output",
     "bar-length": 50,
     "save-credentials": true,
+    "check-for-updates": true,
     "sites": [
         "Zanichelli(Booktab)",
         "Hub-Scuola",
