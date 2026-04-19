@@ -11,9 +11,9 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 - **Zanichelli** (Booktab)
 
-  > [!WARNING]
-  >
-  > Zanichelli does not work in headless mode, when scanning it will open a browser window. Do not resize or close it.
+> [!WARNING]
+>
+> Zanichelli does not work in headless mode, when scanning it will open a browser window. Do not resize or close it.
 
 - **Hub scuola**
 
@@ -25,9 +25,9 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 - **Cambridge**
 
-  > [!WARNING]
-  >
-  > Due to how the e-books are formatted, not all of them are scannable. If your book is presented as a hybrid where multiple pages are stitched together and scrollable it is most likely not supported.
+> [!WARNING]
+>
+> Due to how Cambridge formats the e-books, not all of them are scannable. If your book is presented as a hybrid where multiple pages are stitched together and scrollable it is most likely not supported.
 
 ## Installation
 ### Prerequisites
@@ -49,9 +49,9 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 2.  install python libraries:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 
 > [!NOTE]
@@ -114,13 +114,13 @@ All the configurable settings are found in `configs.json` inside the main direct
 },
 ```
 
-**resolution: ** [x,y] Sets the resolution at which the headless browser window is rendered.
+**resolution:** [x,y] Sets the resolution at which the headless browser window is rendered.
 
 > [!NOTE]
 >
 > The final image resolution seen in the output pdf will not be the same as the **resolution** setting as the image will be cropped to remove all of the site's UI
 
-**sleep-page-seconds: ** Sets the amount of time the scraper will wait for each page to load.
+**sleep-page-seconds:** Sets the amount of time the scraper will wait for each page to load.
 
 > [!TIP]
 >
