@@ -4,3 +4,4 @@ PyPDF2
 keyring
 selenium
 tabulate
+requests
