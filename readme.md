@@ -60,7 +60,7 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 ## Usage
 
-Run `run.py` from the `Bookscraper/` directory:
+Run `run.py` from the root directory:
 
   ```bash
   python run.py
