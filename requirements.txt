@@ -1,0 +1,6 @@
+Pillow
+img2pdf
+PyPDF2
+keyring
+selenium
+tabulate

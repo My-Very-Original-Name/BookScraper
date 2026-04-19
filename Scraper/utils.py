@@ -65,6 +65,6 @@ def stop(web, error_text:str =None):
     if error_text:
         clear_console()
         print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")
-        input("Quitting... press ENTER to exit")
+        input(f"Quitting... press {color("ENTER", "bold_white")} to exit")
         exit(1)
     exit(0)
