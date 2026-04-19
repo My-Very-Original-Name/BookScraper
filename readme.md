@@ -126,7 +126,7 @@ All the configurable settings are found in `configs.json` inside the main direct
 >
 > Most sites are quite unreliable when it comes to loading speed, I have found Hub-scuola to be the worst one. Adjust this setting to suit your specific network speed
 
-**cropping-rectangle: ** [left, up, right, bottom] Sets the default crop area (in pixel coordinates) for the specific site, it functions as a fall-back if the  user does not specify a precise one when prompted. 
+**cropping-rectangle:** [left, up, right, bottom] Sets the default crop area (in pixel coordinates) for the specific site, it functions as a fall-back if the  user does not specify a precise one when prompted. 
 
 ## Notice
 
