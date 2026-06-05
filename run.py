@@ -9,7 +9,7 @@ import time
 
 REPO = "My-Very-Original-Name/BookScraper"
 VERSION_FILE = "version.txt"
-CURRENT_VERSION = "2.0.1"
+VERSION_FILE = os.path.join("Scraper", "version.txt")
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -39,11 +39,15 @@ def check_updates():
         
         remote_version = data["tag_name"]
         release_notes = data["body"]
-        if CURRENT_VERSION == remote_version:
+        current_version = "Version unavailable"
+        if os.path.exists(VERSION_FILE):
+            with open(VERSION_FILE, "r") as f:
+                current_version = f.read()
+        if current_version == remote_version:
             return
 
         clear_screen()
-        print(f"Current version: {CURRENT_VERSION}")
+        print(f"Current version: {current_version}")
         print(f"Update available: {remote_version}")
         print(f"Notes: {release_notes}")
         
