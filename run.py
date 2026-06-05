@@ -5,10 +5,11 @@ import zipfile
 import io
 import sys
 import json
+import time
 
 REPO = "My-Very-Original-Name/BookScraper"
 VERSION_FILE = "version.txt"
-
+CURRENT_VERSION = "2.0.1"
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -17,39 +18,41 @@ def check_updates():
         sys.argv.remove("--post-update")
         return
     if os.path.exists("configs.json"):
-        with open("configs.json", "r") as f:
-            data = json.load(f)
-        if data["check-for-updates"] == False:
+        try:
+            with open("configs.json", "r") as f:
+                data = json.load(f)
+            if data["check-for-updates"] == False:
+                return
+        except Exception:
+            print("ERROR: Missing configuration 'check-for-updates' in 'config.json', aborting update_check...")
+            time.sleep(4)
             return
     try:
         clear_screen()
         print("Checking for updates...")
-        res = requests.get(f"https://api.github.com/repos/{REPO}/commits/main")
+        res = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest")
         data = res.json()
-        remote_sha = data["sha"][:7]
-        if "sha" not in data:
-            print(f"Could not check for updates: {data.get('message', 'unknown error')}")
-            input("Press ENTER to continue...")
+
+        if "tag_name" not in data:
+            print("No releases found or API error.")
             return
-        commit_message = data["commit"]["message"]
         
-        local_sha = ""
-        if os.path.exists(VERSION_FILE):
-            with open(VERSION_FILE) as f:
-                local_sha = f.read().strip()
-            if local_sha == remote_sha:
-                return  
+        remote_version = data["tag_name"]
+        release_notes = data["body"]
+        if CURRENT_VERSION == remote_version:
+            return
 
         clear_screen()
-        print(f"Current version: V{local_sha}")
-        print(f"Update available: V{remote_sha}")
-        print(f"Notes: {commit_message}")
+        print(f"Current version: {CURRENT_VERSION}")
+        print(f"Update available: {remote_version}")
+        print(f"Notes: {release_notes}")
         
-        if input("\nUpdate now? (y/n): ").lower() != "y":
+        if input("\nUpdate now? (y/N): ").lower() != "y":
             return
 
         print("Downloading...")
-        zip_res = requests.get(f"https://github.com/{REPO}/archive/refs/heads/main.zip")
+        zip_url = data["zipball_url"]
+        zip_res = requests.get(zip_url)
         
         with zipfile.ZipFile(io.BytesIO(zip_res.content)) as z:
             if os.path.exists("Scraper"):
@@ -68,9 +71,6 @@ def check_updates():
                         with z.open(file) as src, open(target_path, "wb") as dst:
                             shutil.copyfileobj(src, dst)
         
-        with open(VERSION_FILE, "w") as f:
-            f.write(remote_sha)
-        
         print("Update applied. Restarting...")
         try:
             os.execv(sys.executable, [sys.executable] + sys.argv + ["--post-update"])
@@ -79,8 +79,9 @@ def check_updates():
             exit(0)
         
     except Exception as e:
-        print(f"Update failed: {e}")
-        input("Press ENTER to continue with current version...")
+        print(f"An unexpected error occured, Update failed: {e}")
+        input("Press ENTER to exit")
+        exit(1)
 
 if __name__ == "__main__":
     check_updates()

@@ -9,7 +9,7 @@ def get_configs(name:str):
     returns: output pdf path, cropping rectangle, sleep page (seconds), save credentials, bar
     """
     if not os.path.exists("configs.json"):
-        default_config = {"output-path": "output",
+        default_config = {
     "bar-length": 50,
     "save-credentials": True,
     "output-path": "output",
@@ -67,7 +67,7 @@ def get_configs(name:str):
             "resolution": f[name]["resolution"]
         }
     except Exception as e:
-        stop(1, f"Error loading configuration file: {e}")
+        stop(None, f"Error loading configuration file: {e}")
 
 def load_site_list():
     if not os.path.exists("configs.json"):
