@@ -1,6 +1,10 @@
 from PIL import Image
 import tkinter as tk
 import io
+from rich.progress import Progress, BarColumn, TimeElapsedColumn, TimeRemainingColumn
+from rich.console import Console
+from rich.table import Table
+from rich.prompt import Prompt
 #local imports
 from . import utils 
 
@@ -191,3 +195,17 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
         end="\r"
     )
     return bar
+
+def print_selector_table(book_titles_list, header="Title", ask_book_selection = True):
+    console = Console()
+    table = Table(show_header=True, header_style="bold magenta",row_styles=["on grey11", "on grey15"])
+    table.add_column("Index", style="red", width=5, justify="center")
+    table.add_column(header, justify="center")
+    for i, title in enumerate(book_titles_list):
+        table.add_row(
+            f"{i}",
+            f"{title}"
+        )
+    console.print(table)
+    if not ask_book_selection: return
+    Prompt.ask("[cyan]Insert book[/cyan][red] index[/red]", choices=[str(choice) for choice in range(len(book_titles_list))], show_choices=False)
