@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports:
-from Scraper import utils
+from Scraper import utils, ui
 from .base import _Base_web
 
 class Mylim(_Base_web):
@@ -28,12 +28,11 @@ class Mylim(_Base_web):
         covers = self.wait.until(EC.presence_of_all_elements_located(
             (By.CSS_SELECTOR, 'div[class*="volume_copertina"]')
         ))
-        titles = self.driver.find_elements(By.CSS_SELECTOR, 'h2[class*="titolo"]')
-        books = [[utils.color(str(i), "red"), t.text] for i, t in enumerate(titles)]
+        books = self.driver.find_elements(By.CSS_SELECTOR, 'h2[class*="titolo"]')
+        titles = [book.text for book in books]
         utils.clear_console()
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(covers) - 1)
-        self.book = titles[i].text
+        i = ui.print_selector_table(titles)
+        self.book = titles[i]
         self.driver.execute_script("arguments[0].click();", covers[i])
         utils.clear_console()
         print("Waiting for book to load...")

@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
-from Scraper import utils
+from Scraper import utils, ui
 from .base import _Base_web
 
 class Sanoma(_Base_web):
@@ -40,37 +40,40 @@ class Sanoma(_Base_web):
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-title")))
         elements = self.driver.find_elements(By.CLASS_NAME, "product-title")
         books_elements = [e for e in elements if len(e.text.strip()) > 0]
-        
-        books_table = [[utils.color(i, "red"), e.text] for i, e in enumerate(books_elements)]
+        titles = [book.text for book in books_elements]
+
         utils.clear_console()
-        print(utils.selector_table(books_table)) 
-        idx = utils.get_numeric_input("\nInsert book index: ", 0, len(books_elements) - 1)
+        idx = ui.print_selector_table(titles)
         target_book_element = books_elements[idx]
         self.book = target_book_element.text
         target_book_element.click()
+
         try:
             try:
                 annuity_selector = "ul.annuities-list li.annuity button"
                 self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".annuities-list")))
-                annuities = self.driver.find_elements(By.CSS_SELECTOR, annuity_selector)   
+                annuities = self.driver.find_elements(By.CSS_SELECTOR, annuity_selector)
+
                 if annuities:
-                    annuity_table = [[utils.color(i, "red"), a.text.strip()] for i, a in enumerate(annuities)]
+                    annuities_text = [annuity.text.strip() for annuity in annuities]
                     utils.clear_console()
-                    print(utils.selector_table(annuity_table))
-                    a_idx = utils.get_numeric_input("\nSeleziona l'anno: ", 0, len(annuities) - 1)
+                    a_idx = ui.print_selector_table(annuities_text)
                     annuities[a_idx].click()
             except:
                 pass
+
             volume_selector = "div.clamp-4" 
             self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, volume_selector)))
             vols = self.driver.find_elements(By.CSS_SELECTOR, volume_selector)
-            vol_table = [[utils.color(i, "red"), v.text.strip()] for i, v in enumerate(vols)]
+            vol_texts = [vol.text.strip() for vol in vols]
+
             utils.clear_console()
-            print(utils.selector_table(vol_table))     
-            v_idx = utils.get_numeric_input("\nInsert volume/year index: ", 0, len(vols) - 1)
+            v_idx = ui.print_selector_table(vol_texts)
             vols[v_idx].click()
+
         except Exception as e:
             utils.stop(self, f"Errore nella selezione volume: {e}")
+            
         self.driver.switch_to.window(self.driver.window_handles[-1])
         utils.clear_console()
         print("Waiting for book to load...")
