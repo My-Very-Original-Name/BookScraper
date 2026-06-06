@@ -56,7 +56,6 @@ def get_configs(name:str):
             "sleep_page_seconds": f[name]["sleep-page-seconds"],
             "save_credentials": f["save-credentials"],
             "bar": ["░" for _ in range(f["bar-length"])],
-            "sites_list": f["sites"],
             "resolution": f[name]["resolution"]
         }
     except Exception as e:
