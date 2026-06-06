@@ -5,9 +5,10 @@ from . import utils, ui, config_handler, credential_handler, sites
 
 pdf_merger = PdfMerger()
 
-def select_site(text_site_list):
+def select_site():
     print("\nSelect a site")
     sites_list = sites.SITES
+    text_site_list = sites.TEXT_SITES
     for i, class_ in enumerate(sites_list):
         print(f" {utils.color(sites_list.index(class_), "red")}: {utils.color(text_site_list[i], "yellow")}", end = "")
     selected = utils.get_numeric_input(utils.color("\nEnter site index: ", "blue"), 0, len(sites_list)-1)
@@ -46,7 +47,7 @@ def startup():
     global web
     utils.clear_console()
     print(f"{utils.color("Welcome to BookScraper!", "green")}")
-    web = select_site(config_handler.load_site_list())
+    web = select_site()
     configs = config_handler.get_configs(web.name)
     print("Starting...")
     username, password = credential_handler.get_credentials(web.name, configs["save_credentials"])

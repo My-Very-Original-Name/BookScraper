@@ -13,3 +13,11 @@ SITES = [
     Bsmart,
     Cambridge,
 ]
+TEXT_SITES = [
+        "Zanichelli(Booktab)",
+        "Hub-Scuola",
+        "Loescher(Mylim)",
+        "Sanoma",
+        "Bsmart",
+        "Cambridge"
+        ]

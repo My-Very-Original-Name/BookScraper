@@ -3,14 +3,6 @@
     "bar-length": 50,
     "save-credentials": true,
     "check-for-updates": true,
-    "sites": [
-        "Zanichelli(Booktab)",
-        "Hub-Scuola",
-        "Loescher(Mylim)",
-        "Sanoma",
-        "Bsmart",
-        "Cambridge"
-    ],
     "Zanichelli(Booktab)": {
         "resolution": [
             3840,

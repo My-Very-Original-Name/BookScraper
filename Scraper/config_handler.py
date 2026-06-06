@@ -10,17 +10,10 @@ def get_configs(name:str):
     """
     if not os.path.exists("configs.json"):
         default_config = {
+    "check-for-updates": True,
     "bar-length": 50,
     "save-credentials": True,
     "output-path": "output",
-    "sites": [
-        "Zanichelli(Booktab)",
-        "Hub-Scuola",
-        "Loescher(Mylim)",
-        "Sanoma",
-        "Bsmart",
-        "Cambridge"
-    ],
     "Zanichelli(Booktab)": {
         "resolution": [3840, 2160],
         "sleep-page-seconds": 1.5,
