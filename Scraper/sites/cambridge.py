@@ -2,7 +2,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-from Scraper import utils
+from Scraper import utils, ui
 from .base import _Base_web
 
 class Cambridge(_Base_web):
@@ -27,20 +27,19 @@ class Cambridge(_Base_web):
         utils.clear_console()
         print(f"""{utils.color("WARNING: ", "yellow")} Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.
 {utils.color("WARNING: ", "yellow")} Supported books must be already set to the first page""")
+
         elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
-        books = [[utils.color(str(elements.index(element)), "red"), element.text]for element in elements]
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(books)-1)
+        i = ui.print_selector_table([element.text for element in elements])
         self.book = elements[i].text
         elements[i].click()
+        
         elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "v-card__title")))
-        books = [[utils.color(str(elements.index(element)), "red"), element.text]for element in elements]
         utils.clear_console()
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(books)-1)
+        i = ui.print_selector_table([element.text for element in elements])
         self.book = self.book + elements[i].text
         elements[i].click()
         time.sleep(1.5)
+        
         self.driver.switch_to.window(self.driver.window_handles[-1])
         utils.clear_console()
         print("Waiting for book to load...")

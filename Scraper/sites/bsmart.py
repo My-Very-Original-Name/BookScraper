@@ -2,7 +2,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-from Scraper import utils
+from Scraper import utils, ui
 from .base import _Base_web
 
 class Bsmart(_Base_web):
@@ -38,12 +38,9 @@ class Bsmart(_Base_web):
             if element.text:
                 titles.append(element.text)
             elements_text.append(element.text)
-        books = [[utils.color(str(i), "red"), title] for i, title in enumerate(titles)]
         utils.clear_console()
         print(f"{utils.color("WARNING: ", "yellow")}Books must be already set to the first page")
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(elements) - 1)
-        i = elements_text.index(titles[i])
+        i = ui.print_selector_table(titles)
         self.book = elements[i].text
         elements[i].click()
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.right-0"))).click()
