@@ -2,7 +2,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-from Scraper import utils
+from Scraper import utils, ui
 from .base import _Base_web
 
 class Hub_scuola(_Base_web):
@@ -34,24 +34,23 @@ class Hub_scuola(_Base_web):
         for i, item in enumerate(containers):
             title_el = item.find_element(By.CLASS_NAME, "zW9ivNHXZ2LXEAF2iGDo")
             button_el = item.find_element(By.XPATH, ".//a[.//span[contains(text(), 'Esplora')]]")
-            books.append([utils.color(str(i), "red"), title_el.text[:50]])
+            books.append(title_el.text[:70])
             buttons.append(button_el)
 
         print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
-        print(utils.selector_table(books))
-        choice = utils.get_numeric_input("\nInsert book index: ", 0, len(books) - 1)
+        choice = ui.print_selector_table(books)
         self.book = books[choice][1]
         buttons[choice].click()
     
     def _select_book2(self):
         selector = "swiper-container .LA0in5eDCqmqYQn79QwT"
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+
         elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
         books_elements = [e for e in elements if "CONTENUTI DI ESEMPIO" not in e.text.upper()]
-        books_table = [[utils.color(str(i), "red"), e.text[:50]] for i, e in enumerate(books_elements)]
+
         print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
-        print(utils.selector_table(books_table))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(books_elements) - 1)
+        i = ui.print_selector_table([e.text[:70] for e in books_elements])
         books_elements[i].click()
     
     def _select_edition(self):
@@ -64,10 +63,11 @@ class Hub_scuola(_Base_web):
                 svg_elements = link.find_elements(By.TAG_NAME, "svg")
                 if svg_elements:  
                     first_type_links.append(link)
-        books = [[utils.color(str(first_type_links.index(element)), "red"), element.text[:50]]for element in first_type_links]
+
+        books = [element.text[:70]for element in first_type_links]
         print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
-        print(utils.selector_table(books))
-        i = utils.get_numeric_input("\nInsert book index: ", 0, len(first_type_links) - 1)
+        i = ui.print_selector_table(books)
+
         first_type_links[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         time.sleep(5)

@@ -41,7 +41,7 @@ class Bsmart(_Base_web):
         utils.clear_console()
         print(f"{utils.color("WARNING: ", "yellow")}Books must be already set to the first page")
         i = ui.print_selector_table(titles)
-        self.book = elements[i].text
+        self.book = titles[i]
         elements[i].click()
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.right-0"))).click()
         self.driver.find_elements(By.CSS_SELECTOR, "button[aria-pressed='false'].inline-flex.items-center.justify-center.h-fit")[4].click()

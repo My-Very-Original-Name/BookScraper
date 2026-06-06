@@ -208,4 +208,5 @@ def print_selector_table(book_titles_list, header="Title", ask_book_selection = 
         )
     console.print(table)
     if not ask_book_selection: return
-    Prompt.ask("[cyan]Insert book[/cyan][red] index[/red]", choices=[str(choice) for choice in range(len(book_titles_list))], show_choices=False)
+    choice = Prompt.ask("[cyan]Insert book[/cyan][red] index[/red]", choices=[str(choice) for choice in range(len(book_titles_list))], show_choices=False)
+    return int(choice)
