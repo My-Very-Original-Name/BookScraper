@@ -175,7 +175,7 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     decimal_part = raw_fill % 1
     utils.clear_console() 
     if web_name == "Zanichelli(Booktab)":
-        print(f"{utils.color('WARNING:  ', 'yellow')}Do not resize, close or minimize the browser window")
+        print_reminder("Do not resize, close or minimize the browser window")
     for i in range(max_icon):
         bar[i] = utils.color("█", "purple")
     if decimal_part >= 0.5 and max_icon < len(bar):
@@ -197,19 +197,19 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     )
     return bar
 
-def print_selector_table(book_titles_list:list[str], header="Title", ask_book_selection = True):
+def print_selector_table(values_list:list[str], header="Title", ask_selection = True):
     console = Console()
     table = Table(show_header=True, header_style="bold magenta",row_styles=["on grey11", "on grey15"])
-    table.add_column("Index", style="red", width=5, justify="center")
-    table.add_column(header, justify="center")
-    for i, title in enumerate(book_titles_list):
+    table.add_column("Index", style="#FF0000", width=5, justify="center")
+    table.add_column(header)
+    for i, title in enumerate(values_list):
         table.add_row(
             f"{i}",
             f"{title}"
         )
     console.print(table)
-    if not ask_book_selection: return
-    choice = Prompt.ask("[cyan]Insert book[/cyan][red] index[/red]", choices=[str(choice) for choice in range(len(book_titles_list))], show_choices=False)
+    if not ask_selection: return
+    choice = Prompt.ask(f"[#00E5FF]Insert {header.lower()}[/#00E5FF][#FF0000] index[/#FF0000]", choices=[str(choice) for choice in range(len(values_list))], show_choices=False)
     return int(choice)
 
 def print_reminder(message:str):
@@ -223,5 +223,5 @@ def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_
         if show_choices:
             i = choices_text.index(default_choice)
             choices_text[i] = choices_text[i].capitalize()
-        return Prompt.ask(prompt=f"[cyan]{prompt}[/cyan]", choices=choices_text, show_choices=show_choices, default=default_choice, show_default=False, case_sensitive=False).lower()
-    return Prompt.ask(prompt=f"[cyan]{prompt}[/cyan]", choices=choices_text, show_choices=show_choices, case_sensitive=False).lower()
+        return Prompt.ask(prompt=f"[#00E5FF]{prompt}[/#00E5FF]", choices=choices_text, show_choices=show_choices, default=default_choice, show_default=False, case_sensitive=False).lower()
+    return Prompt.ask(prompt=f"[#00E5FF]{prompt}[/#00E5FF]", choices=choices_text, show_choices=show_choices, case_sensitive=False).lower()

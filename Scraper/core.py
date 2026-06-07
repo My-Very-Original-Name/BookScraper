@@ -6,14 +6,10 @@ from . import utils, ui, config_handler, credential_handler, sites
 pdf_merger = PdfMerger()
 
 def select_site():
-    print("\nSelect a site")
-    sites_list = sites.SITES
     text_site_list = sites.TEXT_SITES
-    for i, class_ in enumerate(sites_list):
-        print(f" {utils.color(sites_list.index(class_), "red")}: {utils.color(text_site_list[i], "yellow")}", end = "")
-    selected = utils.get_numeric_input(utils.color("\nEnter site index: ", "blue"), 0, len(sites_list)-1)
+    i = ui.print_selector_table(text_site_list, header="Site")
     utils.clear_console()
-    return sites.SITES[int(selected)]()
+    return sites.SITES[i]()
 
 def get_img(cropping_rectangle):
     img = Image.open(io.BytesIO(web.take_screenshot()))
@@ -46,7 +42,8 @@ def try_turn(trye):
 def startup():
     global web
     utils.clear_console()
-    print(f"{utils.color("\nWelcome to BookScraper!", "green")}")
+    ui.rPrint("[#A7FC00]Welcome to BookScraper![/#A7FC00]\n")
+
     web = select_site()
     configs = config_handler.get_configs(web.name)
     print("Starting...")
@@ -109,11 +106,11 @@ def save_pdf(configs):
     with open(output_file, "wb") as file:
         pdf_merger.write(file)
     utils.clear_console()
-    print(utils.color(f"Succesfully saved pdf to: ", "green") + utils.color(output_file, "bold_white"))
+    ui.rPrint(f"[#A7FC00]Succesfully saved pdf to: [/#A7FC00][bold white]{output_file}[/bold white]")
     pdf_merger.close()
     if os.path.exists(temp_path):
         shutil.rmtree(temp_path)
-    input(f"Press {utils.color("ENTER", "bold_white")} to exit")
+    input(f"Press [bold white]ENTER[/bold white] to exit")
 
 def main():
     configs, page_number = startup()
