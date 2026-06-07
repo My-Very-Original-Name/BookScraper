@@ -4,5 +4,9 @@ PyPDF2
 keyring
 selenium
 rich
+<<<<<<< HEAD
 requests
 pyvirtualdisplay
+=======
+requests
+>>>>>>> 163d23b (Update version.txt and requirements.txt)
