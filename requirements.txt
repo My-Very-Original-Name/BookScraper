@@ -3,5 +3,5 @@ img2pdf
 PyPDF2
 keyring
 selenium
-tabulate
+rich
 requests
