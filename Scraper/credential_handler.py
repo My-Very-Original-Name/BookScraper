@@ -1,7 +1,7 @@
 import keyring
 import getpass
 #local imports
-from . import utils
+from . import utils, ui
 class Credentials():
     def save_credentials(self,site: str, username: str, password: str):
         keyring.set_password(site, username, password)
@@ -30,13 +30,13 @@ def get_credentials(web_name:str, save_credentials: bool):
     deleted = False
     if  save_credentials and username:
         username, password = credentials.get_credentials(web_name)
-        if input(utils.color("NOTICE:  ", "yellow")+ "using saved credentials: "+utils.color("if you want to delete them enter: \"d\"", "purple")+"\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise: "+ utils.color("Press ENTER to continue ", "purple")).lower() == "d":
+        if ui.generic_user_prompt("[/cyan]Using saved credentials: [purple]if you want to delete them enter: \"d\"[/purple]\nIf you want to diable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise, [purple]Press ENTER to continue[/purple][cyan]", choices=["d", ""], show_choices= False, default_choice="") == "d":
             credentials.delete_credentials(web_name)
             utils.clear_console()
             print(utils.color("Credentials deleted successfully.\n", "green"))
             deleted = True
     if save_credentials and (not username or deleted):
-        print(f"{utils.color("NOTICE:", "yellow")} credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
+        ui.print_reminder("Credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
     if not username or not save_credentials or deleted:
         while True:
             username = getpass.getpass(utils.color(f"Enter your {web_name} username: ","blue"))

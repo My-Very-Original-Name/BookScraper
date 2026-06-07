@@ -37,7 +37,7 @@ class Hub_scuola(_Base_web):
             books.append(title_el.text[:70])
             buttons.append(button_el)
 
-        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
+        ui.print_reminder("Books must be already set to the first page")
         choice = ui.print_selector_table(books)
         self.book = books[choice][1]
         buttons[choice].click()
@@ -49,7 +49,7 @@ class Hub_scuola(_Base_web):
         elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
         books_elements = [e for e in elements if "CONTENUTI DI ESEMPIO" not in e.text.upper()]
 
-        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
+        ui.print_reminder("Books must be already set to the first page")
         i = ui.print_selector_table([e.text[:70] for e in books_elements])
         books_elements[i].click()
     
@@ -65,7 +65,7 @@ class Hub_scuola(_Base_web):
                     first_type_links.append(link)
 
         books = [element.text[:70]for element in first_type_links]
-        print(f"{utils.color('WARNING: ', 'yellow')}Books must be already set to the first page")
+        ui.print_reminder("Books must be already set to the first page")
         i = ui.print_selector_table(books)
 
         first_type_links[i].click()

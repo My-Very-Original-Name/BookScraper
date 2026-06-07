@@ -1,5 +1,6 @@
 import os
 import tabulate
+from rich import print as rPrint
 
 def color(string:str, color:str):
     """
@@ -35,13 +36,13 @@ def color(string:str, color:str):
 
 def clear_console():
     os.system("cls" if os.name == "nt" else "clear")
-    print(color(r"""    ____                 __   _____                                      
+    rPrint("[bold purple]" + r"""    ____                 __   _____                                      
    / __ ) ____   ____   / /__/ ___/ _____ _____ ____ _ ____   ___   _____
   / __  |/ __ \ / __ \ / //_/\__ \ / ___// ___// __ `// __ \ / _ \ / ___/
  / /_/ // /_/ // /_/ // ,<  ___/ // /__ / /   / /_/ // /_/ //  __// /    
 /_____/ \____/ \____//_/|_|/____/ \___//_/    \__,_// .___/ \___//_/     
-                                                   /_/                   """, "bold_purple"))
-    print("\n\n")
+                                                   /_/                   """ + "[/bold purple]")
+    print("\n")
 
 def get_numeric_input(prompt, min_val=0, max_val=None):
     while True:

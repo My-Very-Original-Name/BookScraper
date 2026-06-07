@@ -5,6 +5,7 @@ from rich.progress import Progress, BarColumn, TimeElapsedColumn, TimeRemainingC
 from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
+from rich import print as rPrint
 #local imports
 from . import utils 
 
@@ -196,7 +197,7 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     )
     return bar
 
-def print_selector_table(book_titles_list, header="Title", ask_book_selection = True):
+def print_selector_table(book_titles_list:list[str], header="Title", ask_book_selection = True):
     console = Console()
     table = Table(show_header=True, header_style="bold magenta",row_styles=["on grey11", "on grey15"])
     table.add_column("Index", style="red", width=5, justify="center")
@@ -210,3 +211,17 @@ def print_selector_table(book_titles_list, header="Title", ask_book_selection = 
     if not ask_book_selection: return
     choice = Prompt.ask("[cyan]Insert book[/cyan][red] index[/red]", choices=[str(choice) for choice in range(len(book_titles_list))], show_choices=False)
     return int(choice)
+
+def print_reminder(message:str):
+    if not message: return
+    rPrint(f"[bold purple]REMINDER:[/bold purple] {message}")
+
+def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_choice:str = None):
+    choices_text = [str(choice) for choice in choices]
+    if default_choice:
+        if default_choice not in choices_text: raise ValueError(f"The default_choice '{default_choice}' must be one of the provided choices: {choices_text}")
+        if show_choices:
+            i = choices_text.index(default_choice)
+            choices_text[i] = choices_text[i].capitalize()
+        return Prompt.ask(prompt=f"[cyan]{prompt}[/cyan]", choices=choices_text, show_choices=show_choices, default=default_choice, show_default=False, case_sensitive=False).lower()
+    return Prompt.ask(prompt=f"[cyan]{prompt}[/cyan]", choices=choices_text, show_choices=show_choices, case_sensitive=False).lower()

@@ -39,7 +39,8 @@ class Bsmart(_Base_web):
                 titles.append(element.text)
             elements_text.append(element.text)
         utils.clear_console()
-        print(f"{utils.color("WARNING: ", "yellow")}Books must be already set to the first page")
+        ui.print_reminder("Books must be already set to the first page")
+
         i = ui.print_selector_table(titles)
         self.book = titles[i]
         elements[i].click()

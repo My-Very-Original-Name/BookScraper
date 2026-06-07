@@ -46,7 +46,7 @@ def try_turn(trye):
 def startup():
     global web
     utils.clear_console()
-    print(f"{utils.color("Welcome to BookScraper!", "green")}")
+    print(f"{utils.color("\nWelcome to BookScraper!", "green")}")
     web = select_site()
     configs = config_handler.get_configs(web.name)
     print("Starting...")
