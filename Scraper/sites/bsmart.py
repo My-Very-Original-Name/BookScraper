@@ -2,7 +2,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-from Scraper import utils, ui
+from Scraper import ui
 from .base import _Base_web
 
 class Bsmart(_Base_web):
@@ -38,7 +38,7 @@ class Bsmart(_Base_web):
             if element.text:
                 titles.append(element.text)
             elements_text.append(element.text)
-        utils.clear_console()
+        ui.clear_console()
         ui.print_reminder("Books must be already set to the first page")
 
         i = ui.print_selector_table(titles)

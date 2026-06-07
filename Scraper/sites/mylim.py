@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports:
-from Scraper import utils, ui
+from Scraper import ui
 from .base import _Base_web
 
 class Mylim(_Base_web):
@@ -30,11 +30,11 @@ class Mylim(_Base_web):
         ))
         books = self.driver.find_elements(By.CSS_SELECTOR, 'h2[class*="titolo"]')
         titles = [book.text for book in books]
-        utils.clear_console()
+        ui.clear_console()
         i = ui.print_selector_table(titles)
         self.book = titles[i]
         self.driver.execute_script("arguments[0].click();", covers[i])
-        utils.clear_console()
+        ui.clear_console()
         print("Waiting for book to load...")
         time.sleep(15)
         self.wait.until(EC.presence_of_element_located((By.NAME, "next-page")))

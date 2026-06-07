@@ -1,7 +1,7 @@
 import os
 import json
 #local imports
-from .utils import color, stop
+from Scraper import ui
 
 def get_configs(name:str):
     """
@@ -44,7 +44,7 @@ def get_configs(name:str):
         "sleep-page-seconds": 1.6,
         "cropping-rectangle": [1177, 96, 2651, 1954]
     }} 
-        print(f"{color("WARNING: ", "yellow")}: Missing configuration file, generating new one...")
+        print(f"{ui.color("WARNING: ", "yellow")}: Missing configuration file, generating new one...")
         with open("configs.json", "w") as f:
             json.dump(default_config, f, indent = 4)
     try:
@@ -59,7 +59,7 @@ def get_configs(name:str):
             "resolution": f[name]["resolution"]
         }
     except Exception as e:
-        stop(None, f"Error loading configuration file: {e}")
+        ui.display_err_and_stop(None, f"Error loading configuration file: {e}")
 
 def load_site_list():
     if not os.path.exists("configs.json"):

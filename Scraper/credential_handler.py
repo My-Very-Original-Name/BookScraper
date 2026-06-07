@@ -1,7 +1,7 @@
 import keyring
 import getpass
 #local imports
-from . import utils, ui
+from . import ui
 class Credentials():
     def save_credentials(self,site: str, username: str, password: str):
         keyring.set_password(site, username, password)
@@ -24,7 +24,7 @@ class Credentials():
             print(f"No credentials to delete for {site}")
 
 def get_credentials(web_name:str, save_credentials: bool):
-    utils.clear_console()
+    ui.clear_console()
     credentials = Credentials()
     username, password = credentials.get_credentials(web_name)
     deleted = False
@@ -32,19 +32,19 @@ def get_credentials(web_name:str, save_credentials: bool):
         username, password = credentials.get_credentials(web_name)
         if ui.generic_user_prompt("[/#00E5FF]Using saved credentials: [purple]if you want to delete them enter: \"d\"[/purple]\nIf you want to diable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise, [purple]Press ENTER to continue[/purple][#00E5FF]", choices=["d", ""], show_choices= False, default_choice="") == "d":
             credentials.delete_credentials(web_name)
-            utils.clear_console()
-            print(utils.color("Credentials deleted successfully.\n", "green"))
+            ui.clear_console()
+            print(ui.color("Credentials deleted successfully.\n", "green"))
             deleted = True
     if save_credentials and (not username or deleted):
         ui.print_reminder("Credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
     if not username or not save_credentials or deleted:
         while True:
-            username = getpass.getpass(utils.color(f"Enter your {web_name} username: ","blue"))
-            password = getpass.getpass(utils.color(f"Enter your {web_name} password: ","blue"))
+            username = getpass.getpass(ui.color(f"Enter your {web_name} username: ","blue"))
+            password = getpass.getpass(ui.color(f"Enter your {web_name} password: ","blue"))
             if username and password: break
-            utils.clear_console()
-            print(utils.color("Invalid credentials. Please try again.", "red"))
-        utils.clear_console()
+            ui.clear_console()
+            print(ui.color("Invalid credentials. Please try again.", "red"))
+        ui.clear_console()
         if save_credentials:
             credentials.save_credentials(web_name ,username, password)
     return username, password

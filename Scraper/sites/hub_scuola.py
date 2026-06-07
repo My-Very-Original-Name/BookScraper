@@ -2,7 +2,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #local imports
-from Scraper import utils, ui
+from Scraper import ui
 from .base import _Base_web
 
 class Hub_scuola(_Base_web):
@@ -13,11 +13,11 @@ class Hub_scuola(_Base_web):
         self._setup_driver("https://www.hubscuola.it/login", resolution)
         self._accept_cookies()
         self._enter_credentials(username, password)
-        utils.clear_console()
+        ui.clear_console()
         self._select_book()
-        utils.clear_console()
+        ui.clear_console()
         self._select_book2()
-        utils.clear_console()
+        ui.clear_console()
         self._select_edition()
 
     def _enter_credentials(self, username, password):

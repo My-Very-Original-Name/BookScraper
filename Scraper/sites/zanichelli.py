@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
-from Scraper import utils, ui
+from Scraper import ui
 from .base import _Base_web
 
 class Zanichelli(_Base_web):
@@ -45,15 +45,15 @@ class Zanichelli(_Base_web):
         try:
             self.driver.find_element(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]")
         except Exception as e:
-            utils.stop(self, e)
+            ui.display_err_and_stop(self, e)
         if ui.generic_user_prompt("Logged devices limit for the website reached. Do you want to remove the latest one to continue?",["y", "n"], show_choices=True, default_choice="y") == "n":
-            utils.stop(self,e)
+            ui.display_err_and_stop(self,e)
         self.driver.find_element(By.XPATH, "//mat-icon[contains(@class, 'icon-C_notesdelete') and contains(@class, 'pageIcon')]").click()
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[.//span[text()='ELIMINA']]"))).click()
         try:
             self._single_page_mode()
         except Exception as e:
-            utils.stop(self, e)
+            ui.display_err_and_stop(self, e)
 
     def _single_page_mode(self):
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Impostazioni']"))).click()
@@ -75,7 +75,7 @@ class Zanichelli(_Base_web):
             clean_title = full_label.split("LEGGI EBOOK")[-1].split(",")[0].strip()
             books.append(clean_title)
 
-        utils.clear_console()
+        ui.clear_console()
         ui.print_reminder("Books must be already set to double page mode and to the first page")
         ui.print_reminder("Zanichelli does not work in headless mode, do not resize, close or minimize the browser window")
 
@@ -84,7 +84,7 @@ class Zanichelli(_Base_web):
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
 
-        utils.clear_console()
+        ui.clear_console()
         print("waiting for book to load...")
         time.sleep(5)
 
@@ -92,7 +92,7 @@ class Zanichelli(_Base_web):
             self._single_page_mode()
 
         except Exception:
-            utils.clear_console()
+            ui.clear_console()
             self._delete_devices()
         time.sleep(3)
 

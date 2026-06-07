@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
-from Scraper import utils, ui
+from Scraper import ui
 from .base import _Base_web
 
 class Sanoma(_Base_web):
@@ -42,7 +42,7 @@ class Sanoma(_Base_web):
         books_elements = [e for e in elements if len(e.text.strip()) > 0]
         titles = [book.text for book in books_elements]
 
-        utils.clear_console()
+        ui.clear_console()
         idx = ui.print_selector_table(titles)
         target_book_element = books_elements[idx]
         self.book = target_book_element.text
@@ -56,7 +56,7 @@ class Sanoma(_Base_web):
 
                 if annuities:
                     annuities_text = [annuity.text.strip() for annuity in annuities]
-                    utils.clear_console()
+                    ui.clear_console()
                     a_idx = ui.print_selector_table(annuities_text)
                     annuities[a_idx].click()
             except:
@@ -67,15 +67,15 @@ class Sanoma(_Base_web):
             vols = self.driver.find_elements(By.CSS_SELECTOR, volume_selector)
             vol_texts = [vol.text.strip() for vol in vols]
 
-            utils.clear_console()
+            ui.clear_console()
             v_idx = ui.print_selector_table(vol_texts)
             vols[v_idx].click()
 
         except Exception as e:
-            utils.stop(self, f"Errore nella selezione volume: {e}")
+            ui.display_err_and_stop(self, f"Errore nella selezione volume: {e}")
             
         self.driver.switch_to.window(self.driver.window_handles[-1])
-        utils.clear_console()
+        ui.clear_console()
         print("Waiting for book to load...")
         self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
         try:

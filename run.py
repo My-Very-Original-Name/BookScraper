@@ -90,4 +90,8 @@ def check_updates():
 if __name__ == "__main__":
     check_updates()
     import Scraper.core as core
-    core.main()
+    try:
+        core.main()
+    except KeyboardInterrupt:
+        print("\nKeyboard interrupt by user.")
+        exit(0)

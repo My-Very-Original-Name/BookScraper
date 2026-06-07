@@ -6,8 +6,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
 from rich import print as rPrint
+from rich.prompt import IntPrompt
+import os
 #local imports
-from . import utils 
 
 def get_crop_selection(image):
     """
@@ -173,13 +174,13 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     raw_fill = (len(bar) * progress) / total
     max_icon = int(raw_fill)
     decimal_part = raw_fill % 1
-    utils.clear_console() 
+    clear_console() 
     if web_name == "Zanichelli(Booktab)":
         print_reminder("Do not resize, close or minimize the browser window")
     for i in range(max_icon):
-        bar[i] = utils.color("█", "purple")
+        bar[i] = color("█", "purple")
     if decimal_part >= 0.5 and max_icon < len(bar):
-        bar[max_icon] = utils.color("▒", "bold_white")
+        bar[max_icon] = color("▒", "bold_white")
     percentage = round((100 * progress) / total, 1)
     etc = sleep_page_seconds * (total - progress)
     if etc >= 3600:
@@ -189,10 +190,10 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     else:
         etc_str = f"{round(etc, 1)} seconds"
     print(
-        f"{utils.color('Scanning:', 'blue')} {utils.color(f'{percentage}%', 'bold_green')}  "
+        f"{color('Scanning:', 'blue')} {color(f'{percentage}%', 'bold_green')}  "
         f"{''.join(bar)} "
-        f"[ {utils.color(progress, 'yellow')} / {utils.color(total, 'yellow')} ] pages - "
-        f"{utils.color('ETC: ', 'blue')}{utils.color(etc_str, 'bold_white')}       ",
+        f"[ {color(progress, 'yellow')} / {color(total, 'yellow')} ] pages - "
+        f"{color('ETC: ', 'blue')}{color(etc_str, 'bold_white')}       ",
         end="\r"
     )
     return bar
@@ -225,3 +226,70 @@ def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_
             choices_text[i] = choices_text[i].capitalize()
         return Prompt.ask(prompt=f"[#00E5FF]{prompt}[/#00E5FF]", choices=choices_text, show_choices=show_choices, default=default_choice, show_default=False, case_sensitive=False).lower()
     return Prompt.ask(prompt=f"[#00E5FF]{prompt}[/#00E5FF]", choices=choices_text, show_choices=show_choices, case_sensitive=False).lower()
+
+def clear_console():
+    os.system("cls" if os.name == "nt" else "clear")
+    rPrint("[bold purple]" + r"""    ____                 __   _____                                      
+   / __ ) ____   ____   / /__/ ___/ _____ _____ ____ _ ____   ___   _____
+  / __  |/ __ \ / __ \ / //_/\__ \ / ___// ___// __ `// __ \ / _ \ / ___/
+ / /_/ // /_/ // /_/ // ,<  ___/ // /__ / /   / /_/ // /_/ //  __// /    
+/_____/ \____/ \____//_/|_|/____/ \___//_/    \__,_// .___/ \___//_/     
+                                                   /_/                   """ + "[/bold purple]")
+    print("\n")
+
+def get_numeric_input(prompt, min_val=0, max_val=None):
+    while True:
+        value = IntPrompt.ask(prompt)
+        
+        if value >= min_val and (max_val is None or value <= max_val):
+            return value
+            
+        if max_val is not None:
+            rPrint(f"[bold red]Invalid input:[/bold red] Please enter a value between {min_val} and {max_val}.")
+        else:
+            rPrint(f"[bold red]Invalid input:[/bold red] Please enter a value greater than or equal to {min_val}.")
+
+def color(string:str, color:str):
+    """
+    Available colors: black, red, green, yellow, blue, purple, cyan, white. Prefix with `bold_` for bold version
+    """
+    ansi_colors = {
+        # Reset
+        "reset": "\033[0m",
+
+        # Standard Colors (Normal)
+        "black": "\033[0;30m",
+        "red": "\033[0;31m",
+        "green": "\033[0;32m",
+        "yellow": "\033[0;33m",
+        "blue": "\033[0;34m",
+        "purple": "\033[0;35m",
+        "cyan": "\033[0;36m",
+        "white": "\033[0;37m",
+
+        # bold Colors
+        "bold_black": "\033[1;30m",
+        "bold_red": "\033[1;31m",
+        "bold_green": "\033[1;32m",
+        "bold_yellow": "\033[1;33m",
+        "bold_blue": "\033[1;34m",
+        "bold_purple": "\033[1;35m",
+        "bold_cyan": "\033[1;36m",
+        "bold_white": "\033[1;37m",
+    }
+    if color not in ansi_colors.keys():
+        raise ValueError("Invalid color")
+    return ansi_colors[color] + str(string) + ansi_colors["reset"]
+
+def display_err_and_stop(web, error_text:str =None):
+    try:
+        web.quit()
+    except Exception:
+        clear_console()
+        print(color("ERROR:  ", "red") + f"Failed to stop web component correctly")
+    if error_text:
+        clear_console()
+        print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")
+        input(f"Quitting... press {color("ENTER", "bold_white")} to exit")
+        exit(1)
+    exit(0)

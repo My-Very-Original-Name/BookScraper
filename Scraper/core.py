@@ -1,14 +1,14 @@
 from PIL import Image
 import io, img2pdf, time, os, shutil
 from PyPDF2 import PdfMerger
-from . import utils, ui, config_handler, credential_handler, sites
+from . import ui, config_handler, credential_handler, sites
 
 pdf_merger = PdfMerger()
 
 def select_site():
     text_site_list = sites.TEXT_SITES
     i = ui.print_selector_table(text_site_list, header="Site")
-    utils.clear_console()
+    ui.clear_console()
     return sites.SITES[i]()
 
 def get_img(cropping_rectangle):
@@ -28,7 +28,7 @@ def gen_pdf(img, x, temp_dir):
             temp_pdf.write(pdf_bytes)
         pdf_merger.append(temp_pdf_path)  
     except Exception as e:
-        print(f"\n{utils.color("ERR:  ", "red")}Failed to process image {x}: {e}")
+        print(f"\n{ui.color("ERR:  ", "red")}Failed to process image {x}: {e}")
 
 def try_turn(trye):
     try:
@@ -41,7 +41,7 @@ def try_turn(trye):
 
 def startup():
     global web
-    utils.clear_console()
+    ui.clear_console()
     ui.rPrint("[#A7FC00]Welcome to BookScraper![/#A7FC00]\n")
 
     web = select_site()
@@ -51,23 +51,23 @@ def startup():
     try:
         web.start(username, password, configs["resolution"])
     except Exception as e:
-        utils.stop(web, f"Unexpected error while starting: {e}")
-    utils.clear_console()
-    page_number = utils.get_numeric_input(utils.color("Enter number of pages for '", "blue") + f"{web.book}" + utils.color("': ", "blue"), min_val= 1)
+        ui.display_err_and_stop(web, f"Unexpected error while starting: {e}")
+    ui.clear_console()
+    page_number = ui.get_numeric_input("[#00E5FF]Enter number of pages for '[/#00E5FF]" + f"{web.book}" + "[#00E5FF]'[/#00E5FF]", min_val= 1)
     if not os.path.exists(configs["output_path"]):
         os.makedirs(configs["output_path"])
-    utils.clear_console()
+    ui.clear_console()
     return configs, page_number
 
 def get_accurate_crop(default_crop):
     time.sleep(4)
     img = Image.open(io.BytesIO(web.take_screenshot())).convert('RGB')
-    utils.clear_console()
+    ui.clear_console()
     print("Please continue in the new window, select two opposite cornsers of the page. (the window is resizable)")
     time.sleep(1)
     accurrate_rect = ui.get_crop_selection(img)
     if accurrate_rect: return accurrate_rect
-    utils.clear_console()
+    ui.clear_console()
     return default_crop
 
 def core_loop(num_of_pages, configs, cropping_rectangle):
@@ -86,41 +86,41 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
         try:
             try_turn(0)
         except Exception:
-            print(f"{utils.color("ERROR:  ", "red")}could not turn page, compiling up to page {current_page}")
+            print(f"{ui.color("ERROR:  ", "red")}could not turn page, compiling up to page {current_page}")
             time.sleep(2)
             break
         current_page += 1
         bar = ui.progress_bar(bar, current_page, num_of_pages, web.name, configs["sleep_page_seconds"])
-    utils.clear_console()
+    ui.clear_console()
 
 def save_pdf(configs):
-    utils.clear_console()
+    ui.clear_console()
     output_path = configs["output_path"]
     temp_path = f"{output_path}/{web.book}_tmp"
     output_file = f"{output_path}/{web.book}.pdf"
     if os.path.exists(output_file):
-        if input(utils.color("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + utils.color(f"'{output_file}'", "bold_white") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
-            utils.stop(web)
-        utils.clear_console()
+        if input(ui.color("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + ui.color(f"'{output_file}'", "bold_white") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
+            ui.display_err_and_stop(web)
+        ui.clear_console()
     print("Merging PDFs...")
     with open(output_file, "wb") as file:
         pdf_merger.write(file)
-    utils.clear_console()
+    ui.clear_console()
     ui.rPrint(f"[#A7FC00]Succesfully saved pdf to: [/#A7FC00][bold white]{output_file}[/bold white]")
     pdf_merger.close()
     if os.path.exists(temp_path):
         shutil.rmtree(temp_path)
-    input(f"Press [bold white]ENTER[/bold white] to exit")
+    input(f"Press {ui.color("ENTER", "bold_white")} to exit")
 
 def main():
     configs, page_number = startup()
     cropping_rect = get_accurate_crop(configs["cropping_rectangle"])
     core_loop(page_number, configs, cropping_rect)
     save_pdf(configs)
-    utils.stop(web)
+    ui.display_err_and_stop(web)
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        utils.stop(web, f"An unexpected error has occured: {e}")
+        ui.display_err_and_stop(web, f"An unexpected error has occured: {e}")
