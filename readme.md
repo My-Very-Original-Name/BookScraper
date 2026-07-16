@@ -13,7 +13,7 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 > [!WARNING]
 >
-> Zanichelli does not work in headless mode, when scanning it will open a browser window. Do not resize or close it.
+> Zanichelli does not work in headless mode, when scanning it might open a browser window. Do not resize or close it.
 
 - **Hub scuola**
 
@@ -52,7 +52,7 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
     ```bash
     pip install -r requirements.txt
     ```
-
+3. Linux only: install Xvfb (Xorg-x11-server-Xvfb)
 
 > [!NOTE]
 >
