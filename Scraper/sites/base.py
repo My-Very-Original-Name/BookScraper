@@ -3,15 +3,21 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 
 class _Base_web():
+    def __init__(self):
+        self.can_run_headless = True
+        self.virtual_display = None
+        
     def take_screenshot(self):
         return self.driver.get_screenshot_as_png()
 
     def quit(self):
         self.driver.quit()
+        if self.activated_virtual_display:
+            self.virtual_display.stop()
     def _setup_driver(self, url, resolution):
         options = Options()
         options.add_argument("--headless")
-        
+
         options.set_preference("layout.css.devPixelsPerPx", "1.0") 
         options.set_preference("browser.zoom.siteSpecific", False)  
         options.set_preference("apz.allow_zooming", False)  

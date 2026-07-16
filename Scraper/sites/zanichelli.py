@@ -10,16 +10,19 @@ from .base import _Base_web
 class Zanichelli(_Base_web):
 
     def __init__(self):
+        super().__init__()
         self.name = "Zanichelli(Booktab)"
+        self.can_run_headless = False
 
-    def _setup_driver(self, url, resolution):
+    def _setup_driver(self, url, resolution, window_position):
         self.driver = webdriver.Firefox()
+        self.driver.set_window_position(window_position[0], window_position[1])
         self.driver.set_window_size(resolution[0], resolution[1])
         self.driver.get(url)
         self.wait = WebDriverWait(self.driver, 10)
 
-    def start(self, username, password, resolution):
-        self._setup_driver("https://my.zanichelli.it/", resolution)
+    def start(self, username, password, resolution, window_position = (0,0)):
+        self._setup_driver("https://my.zanichelli.it/", resolution, window_position)
         self._enter_credentials(username, password)
         self._accept_cookies()
         self._select_book()
@@ -77,7 +80,7 @@ class Zanichelli(_Base_web):
 
         ui.clear_console()
         ui.print_reminder("Books must be already set to double page mode and to the first page")
-        ui.print_reminder("Zanichelli does not work in headless mode, do not resize, close or minimize the browser window")
+        ui.print_reminder("Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it.")
 
         i = ui.print_selector_table(books)
         self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()

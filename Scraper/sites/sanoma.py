@@ -8,6 +8,7 @@ from .base import _Base_web
 
 class Sanoma(_Base_web):
     def __init__(self):
+        super().__init__()
         self.name = "Sanoma"
     
     def start(self, username, password, resolution):

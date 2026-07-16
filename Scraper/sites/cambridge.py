@@ -7,6 +7,7 @@ from .base import _Base_web
 
 class Cambridge(_Base_web):
     def __init__(self):
+        super().__init__()
         self.name = "Cambridge"
 
     def start(self, username, password, resolution):
@@ -50,7 +51,7 @@ class Cambridge(_Base_web):
             self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
             self.wait.until(EC.visibility_of_element_located((By.ID, "zoom-singlePage"))).click()
         except Exception:
-            ui.display_err_and_stop(self, "Unable to find test element, book may not be supported.")
+            ui.display_err_and_stop(self, "Unable to find test element, book is not supported.")
         
     def turn_page(self):
         self.driver.find_element(By.ID, "next-page-button").click()

@@ -176,7 +176,7 @@ def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
     decimal_part = raw_fill % 1
     clear_console() 
     if web_name == "Zanichelli(Booktab)":
-        print_reminder("Do not resize, close or minimize the browser window")
+        print_reminder("Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it.")
     for i in range(max_icon):
         bar[i] = color("█", "purple")
     if decimal_part >= 0.5 and max_icon < len(bar):
@@ -283,7 +283,8 @@ def color(string:str, color:str):
 
 def display_err_and_stop(web, error_text:str =None):
     try:
-        web.quit()
+        if web:
+            web.quit()
     except Exception:
         clear_console()
         print(color("ERROR:  ", "red") + f"Failed to stop web component correctly")

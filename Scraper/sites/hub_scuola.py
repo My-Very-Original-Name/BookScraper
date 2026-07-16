@@ -7,6 +7,7 @@ from .base import _Base_web
 
 class Hub_scuola(_Base_web):
     def __init__(self):
+        super().__init__()
         self.name = "Hub-Scuola"
 
     def start(self, username, password, resolution):

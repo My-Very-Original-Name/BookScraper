@@ -1,6 +1,8 @@
 from PIL import Image
 import io, img2pdf, time, os, shutil
 from PyPDF2 import PdfMerger
+from pyvirtualdisplay import Display as VirtDisplay
+import platform
 from . import ui, config_handler, credential_handler, sites
 
 pdf_merger = PdfMerger()
@@ -49,7 +51,10 @@ def startup():
     print("Starting...")
     username, password = credential_handler.get_credentials(web.name, configs["save_credentials"])
     try:
-        web.start(username, password, configs["resolution"])
+        if web.can_run_headless:
+            web.start(username, password, configs["resolution"])
+        else:
+            start_web_in_virtual_screen(web, username, password, configs["resolution"])
     except Exception as e:
         ui.display_err_and_stop(web, f"Unexpected error while starting: {e}")
     ui.clear_console()
@@ -59,13 +64,36 @@ def startup():
     ui.clear_console()
     return configs, page_number
 
+def start_web_in_virtual_screen(web, username, password, resolution):
+    width = resolution[0]
+    height = resolution[1]
+    system = platform.system()
+    if system == "Linux":
+        os.environ["REAL_DISPLAY"] = os.environ.get("DISPLAY", "")
+        d = VirtDisplay(visible=False, size=(width, height))
+        d.start()
+        web.virtual_display = d
+        web.start(username, password, resolution)
+    elif system == "Windows":
+        web.start(username, password, resolution, (-(width + 3000), -(height + 3000)))
+
 def get_accurate_crop(default_crop):
     time.sleep(4)
     img = Image.open(io.BytesIO(web.take_screenshot())).convert('RGB')
     ui.clear_console()
     print("Please continue in the new window, select two opposite cornsers of the page. (the window is resizable)")
     time.sleep(1)
+
+    real_display = os.environ.get("REAL_DISPLAY")
+    virtual_display = os.environ.get("DISPLAY")
+    if real_display:
+        os.environ["DISPLAY"] = real_display
+
     accurrate_rect = ui.get_crop_selection(img)
+
+    if real_display:
+        os.environ["DISPLAY"] = virtual_display
+        
     if accurrate_rect: return accurrate_rect
     ui.clear_console()
     return default_crop
@@ -113,11 +141,17 @@ def save_pdf(configs):
     input(f"Press {ui.color("ENTER", "bold_white")} to exit")
 
 def main():
-    configs, page_number = startup()
-    cropping_rect = get_accurate_crop(configs["cropping_rectangle"])
-    core_loop(page_number, configs, cropping_rect)
-    save_pdf(configs)
-    ui.display_err_and_stop(web)
+    web = None
+    try:
+        configs, page_number = startup()
+        cropping_rect = get_accurate_crop(configs["cropping_rectangle"])
+        core_loop(page_number, configs, cropping_rect)
+        save_pdf(configs)
+        ui.display_err_and_stop(web)
+    except KeyboardInterrupt:
+        print("\nKeyboard interrupt by user.")
+        ui.display_err_and_stop(web=web)
+        exit(0)
 
 if __name__ == "__main__":
     try:

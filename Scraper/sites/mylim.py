@@ -7,6 +7,7 @@ from .base import _Base_web
 
 class Mylim(_Base_web):
     def __init__(self):
+        super().__init__()
         self.name = "Loescher(Mylim)"
 
     def start(self, username, password, resolution):
