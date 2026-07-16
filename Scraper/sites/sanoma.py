@@ -44,6 +44,7 @@ class Sanoma(_Base_web):
         titles = [book.text for book in books_elements]
 
         ui.clear_console()
+        ui.print_reminder("Books must be set to the first page")
         idx = ui.print_selector_table(titles)
         target_book_element = books_elements[idx]
         self.book = target_book_element.text
@@ -58,6 +59,7 @@ class Sanoma(_Base_web):
                 if annuities:
                     annuities_text = [annuity.text.strip() for annuity in annuities]
                     ui.clear_console()
+                    ui.print_reminder("Books must be set to the first page")
                     a_idx = ui.print_selector_table(annuities_text)
                     annuities[a_idx].click()
             except:
@@ -69,6 +71,7 @@ class Sanoma(_Base_web):
             vol_texts = [vol.text.strip() for vol in vols]
 
             ui.clear_console()
+            ui.print_reminder("Books must be set to the first page")
             v_idx = ui.print_selector_table(vol_texts)
             vols[v_idx].click()
 
@@ -80,6 +83,7 @@ class Sanoma(_Base_web):
         print("Waiting for book to load...")
         self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
         try:
+            self.wait.until(EC.element_to_be_clickable((By.ID, "ppms_cm_agree-to-all"))).click()
             self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Pagina singola']"))).click()
         except:
             pass

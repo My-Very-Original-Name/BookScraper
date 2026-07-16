@@ -35,16 +35,18 @@ class Bsmart(_Base_web):
         elements = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/books/'][data-discover='true']")
         titles = []
         elements_text = []
+        valid_elements = []
         for element in elements:
             if element.text:
                 titles.append(element.text)
+                valid_elements.append(element)
             elements_text.append(element.text)
         ui.clear_console()
         ui.print_reminder("Books must be already set to the first page")
 
         i = ui.print_selector_table(titles)
         self.book = titles[i]
-        elements[i].click()
+        valid_elements[i].click()
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.right-0"))).click()
         self.driver.find_elements(By.CSS_SELECTOR, "button[aria-pressed='false'].inline-flex.items-center.justify-center.h-fit")[4].click()
         single_page = self.wait.until(EC.presence_of_element_located((By.XPATH, "//label[input[@aria-label='Single page']]")))

@@ -30,6 +30,7 @@ class Cambridge(_Base_web):
         ui.print_reminder("Books must be already set to the first page")
 
         elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
+        time.sleep(2)
         i = ui.print_selector_table([element.text for element in elements])
         self.book = elements[i].text
         elements[i].click()
