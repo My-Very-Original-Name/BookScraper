@@ -12,13 +12,8 @@ class Bsmart(_Base_web):
 
     def start(self, username, password, resolution):
         self._setup_driver("https://www.bsmart.it/users/sign_in", resolution)
-        self._enter_credentials(username, password)
+        self.enter_credentials(username, password, username_locator=(By.ID, "user_email"), password_locator=(By.ID, "user_password"), login_btn_locator=(By.NAME, "commit"))
         self._select_book()
-
-    def _enter_credentials(self, username, password):
-        self.wait.until(EC.presence_of_element_located((By.ID, "user_email"))).send_keys(username) 
-        self.driver.find_element(By.ID, "user_password").send_keys(password)
-        self.driver.find_element(By.NAME, "commit").click()
     
     def _accept_cookies(self):
         try:

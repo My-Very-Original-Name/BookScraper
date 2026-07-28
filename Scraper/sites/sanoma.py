@@ -13,10 +13,10 @@ class Sanoma(_Base_web):
     
     def start(self, username, password, resolution):
         self._setup_driver("https://place.sanoma.it/", resolution)
-        self._enter_credentials(username, password)
+        self.enter_credentials(username, password)
         self._select_book()
     
-    def _enter_credentials(self, username, password):
+    def enter_credentials(self, username, password):
         self.wait.until(EC.presence_of_element_located((By.NAME, "text"))).send_keys(username)
         time.sleep(0.5)
         self._accept_cookies()
@@ -84,7 +84,11 @@ class Sanoma(_Base_web):
         self.wait.until(EC.frame_to_be_available_and_switch_to_it((By.TAG_NAME, "iframe")))
         try:
             self.wait.until(EC.element_to_be_clickable((By.ID, "ppms_cm_agree-to-all"))).click()
-            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Pagina singola']"))).click()
+            self.wait.until(EC.element_to_be_clickable((By.ID, "ppms_consent_form_success_note_button"))).click()
+        except:
+            pass
+        try:
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[span[text()='Pagina singola']]"))).click()
         except:
             pass
     

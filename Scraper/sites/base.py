@@ -1,6 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+class InvalidLoginError(Exception): pass
 
 class _Base_web():
     def __init__(self):
@@ -12,8 +16,37 @@ class _Base_web():
 
     def quit(self):
         self.driver.quit()
-        if self.activated_virtual_display:
+        if self.virtual_display:
             self.virtual_display.stop()
+
+    def enter_credentials(
+        self,
+        usernmame: str,
+        password: str,
+        username_locator: tuple,
+        password_locator: tuple,
+        login_btn_locator: tuple,
+        timeout: float = 0,
+        check_element: tuple = None,
+        wrong_credentials_element: tuple = None
+    ) -> None:
+        
+        self.wait.until(EC.presence_of_element_located(username_locator)).send_keys(usernmame)
+        self.wait.until(EC.presence_of_element_located(password_locator)).send_keys(password) 
+        self.wait.until(EC.presence_of_element_located(login_btn_locator)).click()
+        
+        time.sleep(1)
+
+        if wrong_credentials_element and self.driver.find_element(wrong_credentials_element):
+            raise InvalidLoginError("Failed login attempt detected")
+        
+        if timeout > 0:
+            time.sleep(timeout)
+            self.wait.until(EC.presence_of_element_located(check_element))
+
+        if check_element:
+            self.wait.until(EC.presence_of_element_located(check_element))
+
     def _setup_driver(self, url, resolution):
         options = Options()
         options.add_argument("--headless")

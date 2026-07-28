@@ -13,6 +13,7 @@ class Hub_scuola(_Base_web):
     def start(self, username, password, resolution):
         self._setup_driver("https://www.hubscuola.it/login", resolution)
         self._accept_cookies()
+        self.enter_credentials(username, password, username_locator=(By.NAME, "username"), password_locator=(By.NAME, "password"), login_btn_locator=(By.XPATH, "//button//span[text()='Accedi']"), check_element=(By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A"))
         self._enter_credentials(username, password)
         ui.clear_console()
         self._select_book()
@@ -20,12 +21,6 @@ class Hub_scuola(_Base_web):
         self._select_book2()
         ui.clear_console()
         self._select_edition()
-
-    def _enter_credentials(self, username, password):
-        self.wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(username)
-        self.driver.find_element(By.NAME, "password").send_keys(password)
-        self.driver.find_elements(By.XPATH, "//button//span[text()='Accedi']")[0].click()
-        self.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A")))
     
     def _select_book(self):
         self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "XZWhLi22KkhBjwHCUUyw")))

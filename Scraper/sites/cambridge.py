@@ -12,10 +12,10 @@ class Cambridge(_Base_web):
 
     def start(self, username, password, resolution):
         self._setup_driver("https://www.cambridge.org/go/login", resolution)
-        self._enter_credentials(username, password)
+        self.enter_credentials(username, password)
         self._select_book()
     
-    def _enter_credentials(self, username, password):
+    def enter_credentials(self, username, password):
         self._accept_cookies()
         time.sleep(1.5)
         self.wait.until(EC.presence_of_element_located((By.ID, "gigya-loginID-75570100315269100"))).send_keys(username)

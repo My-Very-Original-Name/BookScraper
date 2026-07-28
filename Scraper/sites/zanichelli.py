@@ -23,20 +23,17 @@ class Zanichelli(_Base_web):
 
     def start(self, username, password, resolution, window_position = (0,0)):
         self._setup_driver("https://my.zanichelli.it/", resolution, window_position)
-        self._enter_credentials(username, password)
+        self.enter_credentials(
+        username, 
+        password,
+        username_locator=(By.ID, "modal-username-input"), 
+        password_locator=(By.ID, "modal-password-input"), 
+        login_btn_locator=(By.CLASS_NAME, "z-button--container"), 
+        timeout=1, 
+        check_element=(By.ID, "home")
+        )
         self._accept_cookies()
         self._select_book()
-
-    def _enter_credentials(self, username, password):
-        email_input = self.wait.until(EC.presence_of_element_located((By.ID, "modal-username-input")))
-        password_input = self.driver.find_element(By.ID, "modal-password-input")
-
-        email_input.send_keys(username)
-        password_input.send_keys(password)
-
-        self.driver.find_element(By.CLASS_NAME, "z-button--container").click()
-        self.wait.until(EC.presence_of_element_located((By.ID, "home")))
-        time.sleep(1)
 
     def _accept_cookies(self):
         try:
@@ -65,7 +62,7 @@ class Zanichelli(_Base_web):
 
     def check_for_bullshit_popup(self):
         try:
-            self.driver.find_element((By.XPATH, "//button[normalize-space(text())='Chiudi']")).click()
+            self.driver.find_element(((By.XPATH, "//button[normalize-space(text())='Chiudi']"))).click()
         except Exception: pass
 
     def _select_book(self):

@@ -4,6 +4,7 @@ from PyPDF2 import PdfMerger
 from pyvirtualdisplay import Display as VirtDisplay
 import platform
 from . import ui, config_handler, credential_handler, sites
+from sites.base import InvalidLoginError
 
 pdf_merger = PdfMerger()
 
@@ -48,15 +49,23 @@ def startup():
 
     web = select_site()
     configs = config_handler.get_configs(web.name)
-    print("Starting...")
+    ui.clear_console()
     username, password = credential_handler.get_credentials(web.name, configs["save_credentials"])
-    try:
-        if web.can_run_headless:
-            web.start(username, password, configs["resolution"])
-        else:
-            start_web_in_virtual_screen(web, username, password, configs["resolution"])
-    except Exception as e:
-        ui.display_err_and_stop(web, f"Unexpected error while starting: {e}")
+    while True:
+        try:
+            if web.can_run_headless:
+                web.start(username, password, configs["resolution"])
+            else:
+                start_web_in_virtual_screen(web, username, password, configs["resolution"])
+            break
+        except InvalidLoginError:
+            ui.clear_console()
+            ui.print_warning("Password or username are incorrect, please retry. Restarting...")
+            web.quit()
+        except Exception as e:
+            ui.display_err_and_stop(web, f"Unexpected error while starting: {e}")
+            username, password = credential_handler.get_credentials(web.name, configs["save_credentials"], correct_old_credentials= True)
+
     ui.clear_console()
     page_number = ui.get_numeric_input("[#00E5FF]Enter number of pages for '[/#00E5FF]" + f"{web.book}" + "[#00E5FF]'[/#00E5FF]", min_val= 1)
     if not os.path.exists(configs["output_path"]):

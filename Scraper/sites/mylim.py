@@ -12,13 +12,18 @@ class Mylim(_Base_web):
 
     def start(self, username, password, resolution):
         self._setup_driver("https://mylim.loescher.it/#!/login", resolution)
-        self._enter_credentials(username, password)
+        self._accept_cookies()
+        self.enter_credentials(username, password, username_locator=(By.XPATH, "//input[@placeholder='Nome utente']"), password_locator=(By.XPATH, "//input[@placeholder='Password']"), login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]") )
+        #self._enter_credentials(username, password)
         self._select_book()
-    
-    def _enter_credentials(self, username, password):
+
+    def _accept_cookies(self):
         try:
             self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'mantine-Button-root') and .//span[text()='Accetta']]"))).click()
         except Exception: pass
+
+    def _enter_credentials(self, username, password):
+
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Nome utente']"))).send_keys(username)
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Password']"))).send_keys(password)
         button = self.driver.find_element(By.XPATH, "//button[contains(., 'Entra')]")

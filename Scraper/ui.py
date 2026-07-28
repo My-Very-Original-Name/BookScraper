@@ -217,6 +217,10 @@ def print_reminder(message:str):
     if not message: return
     rPrint(f"[bold purple]REMINDER:[/bold purple] {message}")
 
+def print_warning(message:str):
+    if not message: return
+    rPrint(f"[bold orange]WARNING:[/bold orange] {message}")
+
 def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_choice:str = None):
     choices_text = [str(choice) for choice in choices]
     if default_choice:

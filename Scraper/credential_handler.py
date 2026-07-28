@@ -23,20 +23,28 @@ class Credentials():
         else:
             print(f"No credentials to delete for {site}")
 
-def get_credentials(web_name:str, save_credentials: bool):
-    ui.clear_console()
-    credentials = Credentials()
-    username, password = credentials.get_credentials(web_name)
+def get_credentials(web_name:str, save_credentials: bool, correct_old_credentials = False):
     deleted = False
-    if  save_credentials and username:
+    credentials = Credentials()
+
+    if correct_old_credentials: 
+        credentials.delete_credentials()
+        deleted = True
+
+    username, password = credentials.get_credentials(web_name)
+
+    if save_credentials and username and not correct_old_credentials:
         username, password = credentials.get_credentials(web_name)
+        
         if ui.generic_user_prompt("[/#00E5FF]Using saved credentials: [purple]if you want to delete them enter: \"d\"[/purple]\nIf you want to diable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise, [purple]Press ENTER to continue[/purple][#00E5FF]", choices=["d", ""], show_choices= False, default_choice="") == "d":
             credentials.delete_credentials(web_name)
             ui.clear_console()
             print(ui.color("Credentials deleted successfully.\n", "green"))
             deleted = True
+
     if save_credentials and (not username or deleted):
         ui.print_reminder("Credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
+    
     if not username or not save_credentials or deleted:
         while True:
             username = getpass.getpass(ui.color(f"Enter your {web_name} username: ","blue"))
