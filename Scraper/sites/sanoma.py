@@ -4,7 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 #local imports
 from Scraper import ui
-from .base import _Base_web
+from .base import _Base_web, InvalidLoginError
 
 class Sanoma(_Base_web):
     def __init__(self):
@@ -13,16 +13,22 @@ class Sanoma(_Base_web):
     
     def start(self, username, password, resolution):
         self._setup_driver("https://place.sanoma.it/", resolution)
+        time.sleep(0.5)
+        self._accept_cookies()
         self.enter_credentials(username, password)
         self._select_book()
     
     def enter_credentials(self, username, password):
         self.wait.until(EC.presence_of_element_located((By.NAME, "text"))).send_keys(username)
-        time.sleep(0.5)
-        self._accept_cookies()
         self.driver.find_element(By.XPATH, "//button[@title='Accedi']").click()
+        if self.wait.until(lambda driver: self._login_outcome(check_elements=[(By.NAME, "password")], wrong_credentials_elements=[(By.CSS_SELECTOR, "input.border-error")])) == "error":
+            raise InvalidLoginError
+
         self.wait.until(EC.element_to_be_clickable((By.NAME, "password"))).send_keys(password)
         self.driver.find_element(By.NAME, "submit").click()
+        if self.wait.until(lambda driver: self._login_outcome(check_elements=[(By.XPATH, "//a[@href='/prodotti_digitali']")], wrong_credentials_elements=[(By.CLASS_NAME, "auth0-global-message")])) == "error":
+            raise InvalidLoginError
+
     
     def _accept_cookies(self):
         try:

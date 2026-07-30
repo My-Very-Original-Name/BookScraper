@@ -28,7 +28,7 @@ def get_credentials(web_name:str, save_credentials: bool, correct_old_credential
     credentials = Credentials()
 
     if correct_old_credentials: 
-        credentials.delete_credentials()
+        credentials.delete_credentials(web_name)
         deleted = True
 
     username, password = credentials.get_credentials(web_name)

@@ -10,19 +10,28 @@ class Bsmart(_Base_web):
         super().__init__()
         self.name = "Bsmart"
 
-    def start(self, username, password, resolution):
+    def start(self, username, password, resolution) -> None:
         self._setup_driver("https://www.bsmart.it/users/sign_in", resolution)
-        self.enter_credentials(username, password, username_locator=(By.ID, "user_email"), password_locator=(By.ID, "user_password"), login_btn_locator=(By.NAME, "commit"))
+        self.enter_credentials(
+            username, 
+            password, 
+            username_locator=(By.ID, "user_email"), 
+            password_locator=(By.ID, "user_password"), 
+            login_btn_locator=(By.NAME, "commit"),
+            check_elements=[(By.CLASS_NAME, "openlogout")], 
+            wrong_credentials_elements=[(By.XPATH, "//div[@role='alert' and contains(@class, 'custom-flash-message')]"), (By.ID, "parsley-id-5")]
+        )
+        self._accept_cookies()
         self._select_book()
     
-    def _accept_cookies(self):
+    def _accept_cookies(self) -> None:
         try:
             time.sleep(2)
             self.driver.find_element(By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll").click()
         except Exception as e:
             pass
     
-    def _select_book(self):
+    def _select_book(self) -> None:
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".books-app a"))).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href, '/books/')]")))
@@ -49,5 +58,5 @@ class Bsmart(_Base_web):
         button = self.driver.find_elements(By.XPATH, "//button[contains(@class, 'inline-flex')]")[6]
         self.driver.execute_script("arguments[0].click();", button)
     
-    def turn_page(self):
+    def turn_page(self)-> None:
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.right-0"))).click()

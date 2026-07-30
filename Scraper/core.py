@@ -4,7 +4,7 @@ from PyPDF2 import PdfMerger
 from pyvirtualdisplay import Display as VirtDisplay
 import platform
 from . import ui, config_handler, credential_handler, sites
-from sites.base import InvalidLoginError
+from .sites.base import InvalidLoginError
 
 pdf_merger = PdfMerger()
 
@@ -60,11 +60,12 @@ def startup():
             break
         except InvalidLoginError:
             ui.clear_console()
-            ui.print_warning("Password or username are incorrect, please retry. Restarting...")
+            ui.print_warning("Password or username are incorrect, please retry.\n")
             web.quit()
+            username, password = credential_handler.get_credentials(web.name, configs["save_credentials"], correct_old_credentials= True)
         except Exception as e:
             ui.display_err_and_stop(web, f"Unexpected error while starting: {e}")
-            username, password = credential_handler.get_credentials(web.name, configs["save_credentials"], correct_old_credentials= True)
+            
 
     ui.clear_console()
     page_number = ui.get_numeric_input("[#00E5FF]Enter number of pages for '[/#00E5FF]" + f"{web.book}" + "[#00E5FF]'[/#00E5FF]", min_val= 1)
@@ -77,12 +78,14 @@ def start_web_in_virtual_screen(web, username, password, resolution):
     width = resolution[0]
     height = resolution[1]
     system = platform.system()
+
     if system == "Linux":
         os.environ["REAL_DISPLAY"] = os.environ.get("DISPLAY", "")
         d = VirtDisplay(visible=False, size=(width, height))
         d.start()
         web.virtual_display = d
         web.start(username, password, resolution)
+
     elif system == "Windows":
         web.start(username, password, resolution, (-(width + 3000), -(height + 3000)))
 

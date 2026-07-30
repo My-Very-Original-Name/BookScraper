@@ -29,8 +29,9 @@ class Zanichelli(_Base_web):
         username_locator=(By.ID, "modal-username-input"), 
         password_locator=(By.ID, "modal-password-input"), 
         login_btn_locator=(By.CLASS_NAME, "z-button--container"), 
-        timeout=1, 
-        check_element=(By.ID, "home")
+        check_elements=[(By.CSS_SELECTOR, "z-button a[aria-label*='LEGGI EBOOK']")],
+        wrong_credentials_elements=[(By.ID, "modal-password-error-box")],
+        validate_email=False
         )
         self._accept_cookies()
         self._select_book()
@@ -62,7 +63,7 @@ class Zanichelli(_Base_web):
 
     def check_for_bullshit_popup(self):
         try:
-            self.driver.find_element(((By.XPATH, "//button[normalize-space(text())='Chiudi']"))).click()
+            self.driver.find_element(By.XPATH, "//button[normalize-space(text())='Chiudi']").click()
         except Exception: pass
 
     def _select_book(self):

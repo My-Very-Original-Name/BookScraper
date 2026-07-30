@@ -13,7 +13,12 @@ class Mylim(_Base_web):
     def start(self, username, password, resolution):
         self._setup_driver("https://mylim.loescher.it/#!/login", resolution)
         self._accept_cookies()
-        self.enter_credentials(username, password, username_locator=(By.XPATH, "//input[@placeholder='Nome utente']"), password_locator=(By.XPATH, "//input[@placeholder='Password']"), login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]") )
+        self.enter_credentials(
+            username, 
+            password, 
+            username_locator=(By.XPATH, "//input[@placeholder='Nome utente']"), 
+            password_locator=(By.XPATH, "//input[@placeholder='Password']"), 
+            login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]") )
         #self._enter_credentials(username, password)
         self._select_book()
 

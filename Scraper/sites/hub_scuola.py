@@ -13,8 +13,15 @@ class Hub_scuola(_Base_web):
     def start(self, username, password, resolution):
         self._setup_driver("https://www.hubscuola.it/login", resolution)
         self._accept_cookies()
-        self.enter_credentials(username, password, username_locator=(By.NAME, "username"), password_locator=(By.NAME, "password"), login_btn_locator=(By.XPATH, "//button//span[text()='Accedi']"), check_element=(By.CLASS_NAME,"R7FWxhKTRu2I206FyL0A"))
-        self._enter_credentials(username, password)
+        self.enter_credentials(
+            username, 
+            password, 
+            username_locator=(By.NAME, "username"), 
+            password_locator=(By.NAME, "password"), 
+            login_btn_locator=(By.XPATH, "//button//span[text()='Accedi']"), 
+            check_elements=[(By.CLASS_NAME, "XZWhLi22KkhBjwHCUUyw")], 
+            wrong_credentials_elements=[(By.ID, "login-error")]
+        )
         ui.clear_console()
         self._select_book()
         ui.clear_console()
