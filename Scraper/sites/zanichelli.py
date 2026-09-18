@@ -38,11 +38,26 @@ class Zanichelli(_Base_web):
 
     def _accept_cookies(self):
         try:
-            self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
+            host = self.wait.until(
+                EC.presence_of_element_located((By.TAG_NAME, "zanichelli-adv"))
+            )
+
+            shadow_root = host.shadow_root
+            close_btn = shadow_root.find_element(By.CSS_SELECTOR, "z-button[aria-label='Chiudi']")
+            self.driver.execute_script("arguments[0].click();", close_btn)
+        except Exception as e:
+            pass
+        time.sleep(1.5)
+        try:
+            self.wait.until(
+                EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))
+            ).click()
         except Exception:
             pass 
 
     def _delete_devices(self):
+        self._accept_cookies()
+        
         try:
             self.driver.find_element(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]")
         except Exception as e:

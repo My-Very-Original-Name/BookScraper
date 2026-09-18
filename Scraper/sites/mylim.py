@@ -18,7 +18,9 @@ class Mylim(_Base_web):
             password, 
             username_locator=(By.XPATH, "//input[@placeholder='Nome utente']"), 
             password_locator=(By.XPATH, "//input[@placeholder='Password']"), 
-            login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]") )
+            login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]"),
+            check_elements= [(By.XPATH, "//div[contains(@class, 'Library-module__tab_') and normalize-space()='I miei libri']")]
+        )
         #self._enter_credentials(username, password)
         self._select_book()
 

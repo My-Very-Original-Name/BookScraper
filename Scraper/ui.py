@@ -10,6 +10,8 @@ from rich.prompt import IntPrompt
 import os
 #local imports
 
+DEBUG_MODE = False #Toggles debug screenshot on error
+
 def get_crop_selection(image):
     """
     Opens a GUI to select cropping area from an image.
@@ -288,6 +290,8 @@ def color(string:str, color:str):
 def display_err_and_stop(web, error_text:str =None):
     try:
         if web:
+            if error_text and DEBUG_MODE:
+                web.driver.save_screenshot("Debug screenshot.png")
             web.quit()
     except Exception:
         clear_console()

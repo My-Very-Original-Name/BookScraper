@@ -26,12 +26,11 @@ def gen_pdf(img, x, temp_dir):
         img.save(img_bytes, format="PNG")
         img_bytes.seek(0)
         pdf_bytes = img2pdf.convert(img_bytes)
-        temp_pdf_path = f"{temp_dir}/temp_{x}.pdf"
+        temp_pdf_path = f"{temp_dir}/temp_{x:05d}.pdf" 
         with open(temp_pdf_path, "wb") as temp_pdf:
             temp_pdf.write(pdf_bytes)
-        pdf_merger.append(temp_pdf_path)  
     except Exception as e:
-        print(f"\n{ui.color("ERR:  ", "red")}Failed to process image {x}: {e}")
+        print(f"\n{ui.color('ERR:  ', 'red')}Failed to process image {x}: {e}")
 
 def try_turn(trye):
     try:
@@ -81,13 +80,13 @@ def start_web_in_virtual_screen(web, username, password, resolution):
 
     if system == "Linux":
         os.environ["REAL_DISPLAY"] = os.environ.get("DISPLAY", "")
+        real_wayland = os.environ.pop("WAYLAND_DISPLAY", None)
         d = VirtDisplay(visible=False, size=(width, height))
         d.start()
         web.virtual_display = d
         web.start(username, password, resolution)
-
-    elif system == "Windows":
-        web.start(username, password, resolution, (-(width + 3000), -(height + 3000)))
+        if real_wayland:
+            os.environ["WAYLAND_DISPLAY"] = real_wayland
 
 def get_accurate_crop(default_crop):
     time.sleep(4)
@@ -138,21 +137,37 @@ def save_pdf(configs):
     output_path = configs["output_path"]
     temp_path = f"{output_path}/{web.book}_tmp"
     output_file = f"{output_path}/{web.book}.pdf"
+    
     if os.path.exists(output_file):
         if input(ui.color("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + ui.color(f"'{output_file}'", "bold_white") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
             ui.display_err_and_stop(web)
         ui.clear_console()
+
     print("Merging PDFs...")
+
+    merger = PdfMerger()
+    
+    pdf_files = sorted([f for f in os.listdir(temp_path) if f.endswith(".pdf")])
+
+    for pdf_file in pdf_files:
+        full_path = os.path.join(temp_path, pdf_file)
+        with open(full_path, "rb") as f:
+            merger.append(f)
+
     with open(output_file, "wb") as file:
-        pdf_merger.write(file)
+        merger.write(file)
+
+    merger.close()
+
     ui.clear_console()
     ui.rPrint(f"[#A7FC00]Succesfully saved pdf to: [/#A7FC00][bold white]{output_file}[/bold white]")
-    pdf_merger.close()
+    
     if os.path.exists(temp_path):
         shutil.rmtree(temp_path)
-    input(f"Press {ui.color("ENTER", "bold_white")} to exit")
+    input(f"Press {ui.color('ENTER', 'bold_white')} to exit")
 
 def main():
+    global web
     web = None
     try:
         configs, page_number = startup()
