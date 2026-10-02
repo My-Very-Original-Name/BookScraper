@@ -8,6 +8,7 @@ from rich.prompt import Prompt
 from rich import print as rPrint
 from rich.prompt import IntPrompt
 import os
+import time
 #local imports
 
 DEBUG_MODE = False #Toggles debug screenshot on error
@@ -172,13 +173,15 @@ def get_crop_selection(image):
     return crop_rectangle
 
 
-def progress_bar(bar, progress, total, web_name, sleep_page_seconds):
+def progress_bar(bar, progress, total, loading_reminder, sleep_page_seconds):
     raw_fill = (len(bar) * progress) / total
     max_icon = int(raw_fill)
     decimal_part = raw_fill % 1
     clear_console() 
-    if web_name == "Zanichelli(Booktab)":
-        print_reminder("Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it.")
+    if loading_reminder:
+        print_reminder(loading_reminder)
+
+    
     for i in range(max_icon):
         bar[i] = color("█", "purple")
     if decimal_part >= 0.5 and max_icon < len(bar):
@@ -219,9 +222,10 @@ def print_reminder(message:str):
     if not message: return
     rPrint(f"[bold purple]REMINDER:[/bold purple] {message}")
 
-def print_warning(message:str):
+def print_warning(message:str, sleep_seconds:int = 0):
     if not message: return
     rPrint(f"[bold yellow]WARNING:[/bold yellow] {message}")
+    time.sleep(sleep_seconds)
 
 def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_choice:str = None):
     choices_text = [str(choice) for choice in choices]
@@ -293,9 +297,9 @@ def display_err_and_stop(web, error_text:str =None):
             if error_text and DEBUG_MODE:
                 web.driver.save_screenshot("Debug screenshot.png")
             web.quit()
-    except Exception:
+    except Exception as e:
         clear_console()
-        print(color("ERROR:  ", "red") + f"Failed to stop web component correctly")
+        print(color("ERROR:  ", "red") + f"Failed to stop web component correctly: {e}")
     if error_text:
         clear_console()
         print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")

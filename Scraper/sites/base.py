@@ -11,8 +11,9 @@ class _Base_web():
     def __init__(self) -> None:
         self.can_run_headless = True
         self.virtual_display = None
+        self.loading_reminder = None
         
-    def take_screenshot(self) -> None:
+    def take_screenshot(self):
         return self.driver.get_screenshot_as_png()
 
     def quit(self) -> None:

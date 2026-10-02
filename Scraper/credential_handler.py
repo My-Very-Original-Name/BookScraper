@@ -36,7 +36,7 @@ def get_credentials(web_name:str, save_credentials: bool, correct_old_credential
     if save_credentials and username and not correct_old_credentials:
         username, password = credentials.get_credentials(web_name)
         
-        if ui.generic_user_prompt("[/#00E5FF]Using saved credentials: [purple]if you want to delete them enter: \"d\"[/purple]\nIf you want to diable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise, [purple]Press ENTER to continue[/purple][#00E5FF]", choices=["d", ""], show_choices= False, default_choice="") == "d":
+        if ui.generic_user_prompt("[/#00E5FF]Using saved credentials: [purple]if you want to delete them enter: \"d\"[/purple]\nIf you want to disable credential saving, set \"save-credentials\" in \"configs.json\" to false. \nOtherwise, [purple]Press ENTER to continue[/purple][#00E5FF]", choices=["d", ""], show_choices= False, default_choice="") == "d":
             credentials.delete_credentials(web_name)
             ui.clear_console()
             print(ui.color("Credentials deleted successfully.\n", "green"))

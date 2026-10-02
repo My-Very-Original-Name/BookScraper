@@ -115,12 +115,18 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
     temp_dir = f"{configs["output_path"]}/{web.book}_tmp"
     if not os.path.exists(temp_dir):
         os.mkdir(temp_dir)
+    
+    if web.name == "Macmillan":
+        web.cropping_rectangle = cropping_rectangle
+
     while current_page < num_of_pages:
         if os.path.exists(f"{temp_dir}/temp_{current_page}.pdf"):
             os.remove(f"{temp_dir}/temp_{current_page}.pdf")
         time.sleep(configs["sleep_page_seconds"])
+
         if web.name == "Zanichelli(Booktab)":  
             web.check_for_bullshit_popup()
+
         gen_pdf(get_img(cropping_rectangle) ,current_page, temp_dir)
         try:
             try_turn(0)
@@ -129,7 +135,7 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
             time.sleep(2)
             break
         current_page += 1
-        bar = ui.progress_bar(bar, current_page, num_of_pages, web.name, configs["sleep_page_seconds"])
+        bar = ui.progress_bar(bar, current_page, num_of_pages, web.loading_reminder, configs["sleep_page_seconds"])
     ui.clear_console()
 
 def save_pdf(configs):

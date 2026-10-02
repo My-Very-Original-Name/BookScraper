@@ -8,8 +8,8 @@ def get_configs(name:str):
     name = web.name
     returns: output pdf path, cropping rectangle, sleep page (seconds), save credentials, bar
     """
-    if not os.path.exists("configs.json"):
-        default_config = {
+    
+    default_config = {
     "check-for-updates": True,
     "bar-length": 50,
     "save-credentials": True,
@@ -43,13 +43,27 @@ def get_configs(name:str):
         "resolution": [3840, 2160],
         "sleep-page-seconds": 1.6,
         "cropping-rectangle": [1177, 96, 2651, 1954]
-    }} 
-        print(f"{ui.color("WARNING: ", "yellow")}: Missing configuration file, generating new one...")
+    },
+    "Macmillan": {
+        "resolution": [3840, 2160],
+        "sleep-page-seconds": 0.5,
+        "cropping-rectangle": [1177, 96, 2651, 1954]
+    }
+    } 
+    if not os.path.exists("configs.json"):
+        ui.print_warning("Missing configuration file, generating new one...", sleep_seconds=2)
         with open("configs.json", "w") as f:
             json.dump(default_config, f, indent = 4)
+
+    with open("configs.json", "r") as file:
+        f = json.load(file)
+
+    check_for_added_conf_entries(f, default_config)
+
     try:
         with open("configs.json", "r") as file:
             f = json.load(file)
+
         return {
             "output_path": f["output-path"],
             "cropping_rectangle": f[name]["cropping-rectangle"],
@@ -61,15 +75,15 @@ def get_configs(name:str):
     except Exception as e:
         ui.display_err_and_stop(None, f"Error loading configuration file: {e}")
 
-def load_site_list():
-    if not os.path.exists("configs.json"):
-        return [
-        "Zanichelli(Booktab)",
-        "Hub-Scuola",
-        "Loescher(Mylim)",
-        "Sanoma",
-        "Bsmart",
-        "Cambridge"
-        ]
-    with open("configs.json", "r") as f:
-        return json.load(f)["sites"]
+def check_for_added_conf_entries(file, current_dict):
+    missing_keys = current_dict.keys() - file.keys()
+    if not missing_keys: 
+        return False
+    ui.print_warning("Missing entries in the configuration file, appending new ones...", sleep_seconds=2)
+    
+    
+    for key in missing_keys:
+        file[key] = current_dict[key]
+    
+    with open("configs.json", "w") as f:
+        json.dump(file, f, indent = 4)

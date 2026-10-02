@@ -13,6 +13,7 @@ class Zanichelli(_Base_web):
         super().__init__()
         self.name = "Zanichelli(Booktab)"
         self.can_run_headless = False
+        self.loading_reminder = "Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it."
 
     def _setup_driver(self, url, resolution, window_position):
         self.driver = webdriver.Firefox()

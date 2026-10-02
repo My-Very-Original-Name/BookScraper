@@ -4,6 +4,7 @@ from .mylim import Mylim
 from .sanoma import Sanoma
 from .bsmart import Bsmart
 from .cambridge import Cambridge
+from .macmillan import Macmillan
 
 SITES = [
     Zanichelli,
@@ -12,6 +13,7 @@ SITES = [
     Sanoma,
     Bsmart,
     Cambridge,
+    Macmillan,
 ]
 TEXT_SITES = [
         "Zanichelli(Booktab)",
@@ -19,5 +21,6 @@ TEXT_SITES = [
         "Loescher(Mylim)",
         "Sanoma",
         "Bsmart",
-        "Cambridge"
+        "Cambridge",
+        "Macmillan"
         ]
