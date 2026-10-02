@@ -118,7 +118,7 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
     
     if web.name == "Macmillan":
         web.cropping_rectangle = cropping_rectangle
-
+    print("\033[?25l", end="")
     while current_page < num_of_pages:
         if os.path.exists(f"{temp_dir}/temp_{current_page}.pdf"):
             os.remove(f"{temp_dir}/temp_{current_page}.pdf")
@@ -136,6 +136,7 @@ def core_loop(num_of_pages, configs, cropping_rectangle):
             break
         current_page += 1
         bar = ui.progress_bar(bar, current_page, num_of_pages, web.loading_reminder, configs["sleep_page_seconds"])
+    print("\033[?25h", end="")
     ui.clear_console()
 
 def save_pdf(configs):
@@ -145,9 +146,13 @@ def save_pdf(configs):
     output_file = f"{output_path}/{web.book}.pdf"
     
     if os.path.exists(output_file):
-        if input(ui.color("WARNING: ", "red") + f" A file with the same name as the output already exists!: " + ui.color(f"'{output_file}'", "bold_white") +  "\ncontinuing would overwrite it. Do you wish to proceed? (y/n): ").lower() == "n":
-            ui.display_err_and_stop(web)
-        ui.clear_console()
+        value = 1
+        while True:
+            output_file = f"{output_path}/{web.book}{value}.pdf"
+            if not os.path.exists(output_file): break
+            value +=1
+            if value > 500:
+                ui.display_err_and_stop(web, "You really have 500 files with the same name? Just what are you doing...")
 
     print("Merging PDFs...")
 

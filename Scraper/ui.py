@@ -203,7 +203,11 @@ def progress_bar(bar, progress, total, loading_reminder, sleep_page_seconds):
     )
     return bar
 
-def print_selector_table(values_list:list[str], header="Title", ask_selection = True):
+def print_selector_table(values_list:list[str], header="Title", ask_selection = True, auto_select_single_entries = True):
+    if auto_select_single_entries and len(values_list) == 1:
+        rPrint(f"[#00E5FF]Auto-selected '[/#00E5FF]{values_list[0]}[#00E5FF]' continuing execution...")
+        time.sleep(2)
+        return 0
     console = Console()
     table = Table(show_header=True, header_style="bold magenta",row_styles=["on grey11", "on grey15"])
     table.add_column("Index", style="#FF0000", width=5, justify="center")
@@ -292,6 +296,7 @@ def color(string:str, color:str):
     return ansi_colors[color] + str(string) + ansi_colors["reset"]
 
 def display_err_and_stop(web, error_text:str =None):
+    print("\033[?25h", end="")
     try:
         if web:
             if error_text and DEBUG_MODE:

@@ -84,6 +84,9 @@ class Macmillan(_Base_web):
         if self.driver.find_elements(By.CLASS_NAME, "fixed-page-frame-center"): 
             return base_img_bytes
         
+        elif not self.cropping_rectangle:
+            ui.display_err_and_stop(self, "Could not find single page to use as a template for cropping, please restart the scan on a single page.")
+        
         base_img = Image.open(io.BytesIO(base_img_bytes))
 
         offset = int((self.cropping_rectangle[2] - self.cropping_rectangle[0])/2)
