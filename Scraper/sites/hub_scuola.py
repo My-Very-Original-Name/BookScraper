@@ -42,7 +42,7 @@ class Hub_scuola(_Base_web):
 
         ui.print_reminder("Books must be already set to the first page")
         choice = ui.print_selector_table(books)
-        self.book = books[choice][1]
+        self.book = books[choice]
         buttons[choice].click()
     
     def _select_book2(self):
@@ -85,5 +85,9 @@ class Hub_scuola(_Base_web):
     def turn_page(self):
         self.wait.until(EC.presence_of_element_located((By.ID, "pspdfkit-next-page"))).click()
     
-    def check_load(self):
-        self.wait.until(EC.element_to_be_clickable((By.ID, "pspdfkit-next-page")))
+    def _check_load(self):
+        self.wait.until(EC.invisibility_of_element((By.ID, "initialLoader")))
+    
+    def take_screenshot(self):
+        self._check_load()
+        return self.driver.get_screenshot_as_png()

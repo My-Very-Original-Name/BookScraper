@@ -19,7 +19,8 @@ class Mylim(_Base_web):
             username_locator=(By.XPATH, "//input[@placeholder='Nome utente']"), 
             password_locator=(By.XPATH, "//input[@placeholder='Password']"), 
             login_btn_locator=(By.XPATH, "//button[contains(., 'Entra')]"),
-            check_elements= [(By.XPATH, "//div[contains(@class, 'Library-module__tab_') and normalize-space()='I miei libri']")]
+            check_elements= [(By.XPATH, "//div[contains(@class, 'Library-module__tab_') and normalize-space()='I miei libri']")],
+            wrong_credentials_elements=[(By.CSS_SELECTOR, 'section[data-modal-content="true"]')]
         )
         #self._enter_credentials(username, password)
         self._select_book()
@@ -27,6 +28,7 @@ class Mylim(_Base_web):
     def _accept_cookies(self):
         try:
             self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'mantine-Button-root') and .//span[text()='Accetta']]"))).click()
+            self.wait.until(EC.invisibility_of_element((By.XPATH, "//button[contains(@class, 'mantine-Button-root') and .//span[text()='Accetta']]")))
         except Exception: pass
 
     def _enter_credentials(self, username, password):

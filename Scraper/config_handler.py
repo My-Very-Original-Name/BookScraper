@@ -55,14 +55,12 @@ def get_configs(name:str):
         with open("configs.json", "w") as f:
             json.dump(default_config, f, indent = 4)
 
-    with open("configs.json", "r") as file:
-        f = json.load(file)
-
-    check_for_added_conf_entries(f, default_config)
 
     try:
         with open("configs.json", "r") as file:
             f = json.load(file)
+
+        f = check_for_added_conf_entries(f, default_config)
 
         return {
             "output_path": f["output-path"],
@@ -78,12 +76,14 @@ def get_configs(name:str):
 def check_for_added_conf_entries(file, current_dict):
     missing_keys = current_dict.keys() - file.keys()
     if not missing_keys: 
-        return False
-    ui.print_warning("Missing entries in the configuration file, appending new ones...", sleep_seconds=2)
+        return file
     
+    ui.print_warning("Missing entries in the configuration file, appending new ones...", sleep_seconds=2)
     
     for key in missing_keys:
         file[key] = current_dict[key]
     
     with open("configs.json", "w") as f:
         json.dump(file, f, indent = 4)
+
+    return file

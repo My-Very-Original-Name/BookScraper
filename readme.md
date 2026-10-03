@@ -1,5 +1,5 @@
 # BookScraper
-Bookscraper is a python-built tool that converts **owned e-books** from Italian educational sites into PDFs for local personal use to bypass the clunky and slow proprietary e-readers provided by publishers.
+BookScraper is a python-built tool that converts **owned e-books** from Italian educational sites into PDFs for local personal use to bypass the clunky and slow proprietary e-readers provided by publishers.
 
 ## Key features
 
@@ -15,13 +15,15 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 >
 > Zanichelli does not work in headless mode, when scanning it might open a browser window. Do not resize or close it.
 
-- **Hub scuola**
+- **Hub Scuola**
 
 - **Loescher** (Mylim)
 
 - **Sanoma**
 
 - **Bsmart**
+
+- **Macmillan**
 
 - **Cambridge**
 
@@ -37,7 +39,7 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
 
 > [!WARNING]
 >
-> **Fellow Linux users:** Tkinter is required but its not always bundled with python for some reason. Ensure you have it installed: `sudo apt-get install python3-tk`
+> **Fellow Linux users:** Tkinter is required but it's not always bundled with python for some reason. Ensure you have it installed: `sudo apt-get install python3-tk`
 
 ### Setup
 
@@ -47,7 +49,7 @@ Bookscraper is a python-built tool that converts **owned e-books** from Italian 
    git clone https://github.com/My-Very-Original-Name/BookScraper.git
    ```
 
-2.  install python libraries:
+2.  install Python libraries:
 
     ```bash
     pip install -r requirements.txt
@@ -68,7 +70,7 @@ Run `run.py` from the root directory:
 
 ### Updating
 
-On startup the program will automatically look for updates. If found it will reinstall the `Scraper/` directory. It will **not** overwrite configurations or delete the output folder. This  can be disabled in `configs.json`
+On startup the program will automatically look for updates. If found it will reinstall the `Scraper/` directory. It will **not** overwrite configurations or delete the output folder. This can be disabled in `configs.json`
 
 ### Credential Handling
 
@@ -94,7 +96,7 @@ All the configurable settings are found in `configs.json` inside the main direct
 >
 > Disabling credential saving while having already stored credentials will not delete them. To delete them you must keep it on and delete them in the program when prompted.
 
-**check for updates:** toggles update check at startup
+**check-for-updates:** toggles update check at startup
 
 ### Site specific settings
 
@@ -126,11 +128,11 @@ All the configurable settings are found in `configs.json` inside the main direct
 >
 > Most sites are quite unreliable when it comes to loading speed, I have found Hub-scuola to be the worst one. Adjust this setting to suit your specific network speed
 
-**cropping-rectangle:** [left, up, right, bottom] Sets the default crop area (in pixel coordinates) for the specific site, it functions as a fall-back if the  user does not specify a precise one when prompted. 
+**cropping-rectangle:** [left, top, right, bottom] Sets the default crop area (in pixel coordinates) for the specific site. It functions as a fall-back if the user does not specify a precise one when prompted.
 
 ## Notice
 
-I am a solo student and generally update the scraping logic only whenever i actually need to use it. If anyone actually ends up downloading this and a site update breaks the tool feel free to open an issue and ill' try to help out.
+I am a solo student and generally update the scraping logic only whenever I actually need to use it. If anyone actually ends up downloading this and a site update breaks the tool feel free to open an issue and i'll try to help out.
 
 ## DISCLAIMER
 

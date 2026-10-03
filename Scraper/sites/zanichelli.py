@@ -13,7 +13,7 @@ class Zanichelli(_Base_web):
         super().__init__()
         self.name = "Zanichelli(Booktab)"
         self.can_run_headless = False
-        self.loading_reminder = "Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it."
+        self.loading_reminder = "Zanichelli does not work in headless mode. If you see a browser window do not resize, close or minimize it."
 
     def _setup_driver(self, url, resolution, window_position):
         self.driver = webdriver.Firefox()
@@ -62,9 +62,9 @@ class Zanichelli(_Base_web):
         try:
             self.driver.find_element(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]")
         except Exception as e:
-            ui.display_err_and_stop(self, e)
-        if ui.generic_user_prompt("Logged devices limit for the website reached. Do you want to remove the latest one to continue?",["y", "n"], show_choices=True, default_choice="y") == "n":
-            ui.display_err_and_stop(self,e)
+            if ui.generic_user_prompt("Logged devices limit for the website reached. Do you want to remove the latest one to continue?",["y", "n"], show_choices=True, default_choice="y") == "n":
+                ui.display_err_and_stop(self,e)
+
         self.driver.find_element(By.XPATH, "//mat-icon[contains(@class, 'icon-C_notesdelete') and contains(@class, 'pageIcon')]").click()
         self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[.//span[text()='ELIMINA']]"))).click()
         try:
@@ -94,23 +94,25 @@ class Zanichelli(_Base_web):
 
         ui.clear_console()
         ui.print_reminder("Books must be already set to double page mode and to the first page")
-        ui.print_reminder("Zanichelli does not work in headless mode, if you see a browser window do not resize, close or minimize it.")
+        ui.print_reminder("Zanichelli does not work in headless mode. If you see a browser window do not resize, close or minimize it.")
 
         i = ui.print_selector_table(books)
-        self.book = buttons[i].get_attribute("aria-label").split("LEGGI EBOOK")[-1].strip()
+        self.book = books[i]
         buttons[i].click()
         self.driver.switch_to.window(self.driver.window_handles[1])
 
         ui.clear_console()
-        print("waiting for book to load...")
+        print("Waiting for book to load...")
         time.sleep(5)
 
         try:
             self._single_page_mode()
 
-        except Exception:
-            ui.clear_console()
-            self._delete_devices()
+        except Exception as e:
+            if self.driver.find_elements(By.XPATH, "//span[contains(., 'Hai raggiunto il numero massimo')]"):
+                ui.clear_console()
+                self._delete_devices()
+            raise Exception(e)
         time.sleep(3)
 
 

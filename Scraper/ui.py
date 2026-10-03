@@ -7,6 +7,7 @@ from rich.table import Table
 from rich.prompt import Prompt
 from rich import print as rPrint
 from rich.prompt import IntPrompt
+from rich.markup import escape
 import os
 import time
 #local imports
@@ -204,8 +205,12 @@ def progress_bar(bar, progress, total, loading_reminder, sleep_page_seconds):
     return bar
 
 def print_selector_table(values_list:list[str], header="Title", ask_selection = True, auto_select_single_entries = True):
+
+    if not values_list:
+        raise ValueError("No entries provided")
+
     if auto_select_single_entries and len(values_list) == 1:
-        rPrint(f"[#00E5FF]Auto-selected '[/#00E5FF]{values_list[0]}[#00E5FF]' continuing execution...")
+        rPrint(f"[#00E5FF]Auto-selected '[/#00E5FF]{escape(values_list[0])}[#00E5FF]', continuing execution...")
         time.sleep(2)
         return 0
     console = Console()
@@ -213,13 +218,11 @@ def print_selector_table(values_list:list[str], header="Title", ask_selection = 
     table.add_column("Index", style="#FF0000", width=5, justify="center")
     table.add_column(header)
     for i, title in enumerate(values_list):
-        table.add_row(
-            f"{i}",
-            f"{title}"
-        )
+        table.add_row(f"{i}", escape(str(title)))
+        
     console.print(table)
     if not ask_selection: return
-    choice = Prompt.ask(f"[#00E5FF]Insert {header.lower()}[/#00E5FF][#FF0000] index[/#FF0000]", choices=[str(choice) for choice in range(len(values_list))], show_choices=False)
+    choice = Prompt.ask(f"[#00E5FF]Select {header.lower()}[/#00E5FF][#FF0000] index[/#FF0000]", choices=[str(choice) for choice in range(len(values_list))], show_choices=False)
     return int(choice)
 
 def print_reminder(message:str):
@@ -229,6 +232,11 @@ def print_reminder(message:str):
 def print_warning(message:str, sleep_seconds:int = 0):
     if not message: return
     rPrint(f"[bold yellow]WARNING:[/bold yellow] {message}")
+    time.sleep(sleep_seconds)
+
+def print_error(message:str, sleep_seconds: int = 0):
+    if not message: return
+    rPrint(f"[bold red]ERROR:[/bold red] {message}")
     time.sleep(sleep_seconds)
 
 def generic_user_prompt(prompt:str, choices:list, show_choices = False, default_choice:str = None):
@@ -297,16 +305,15 @@ def color(string:str, color:str):
 
 def display_err_and_stop(web, error_text:str =None):
     print("\033[?25h", end="")
+    clear_console()
     try:
         if web:
             if error_text and DEBUG_MODE:
                 web.driver.save_screenshot("Debug screenshot.png")
             web.quit()
     except Exception as e:
-        clear_console()
         print(color("ERROR:  ", "red") + f"Failed to stop web component correctly: {e}")
     if error_text:
-        clear_console()
         print(color("ERROR:  ", "red") + f"A critical error has occured, {error_text}")
         input(f"Quitting... press {color("ENTER", "bold_white")} to exit")
         exit(1)

@@ -7,6 +7,8 @@ import io
 from Scraper import ui
 from .base import _Base_web
 
+class MacmillanFailedPageExeption(Exception): pass
+
 class Macmillan(_Base_web):
     def __init__(self):
         super().__init__()
@@ -41,9 +43,9 @@ class Macmillan(_Base_web):
         i = ui.print_selector_table(titles)
         
         books[i].click()
-        self.book = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.u-button.u-button--primary.arrow-next"))).click()
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.u-button.u-button--primary.arrow-next"))).click()
         time.sleep(2)
-        self.book = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.u-button.u-button--primary.view-link--button"))).click()
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a.u-button.u-button--primary.view-link--button"))).click()
         time.sleep(2)
         self.driver.switch_to.window(self.driver.window_handles[1])
         self._dismiss_popups()
@@ -85,7 +87,7 @@ class Macmillan(_Base_web):
             return base_img_bytes
         
         elif not self.cropping_rectangle:
-            ui.display_err_and_stop(self, "Could not find single page to use as a template for cropping, please restart the scan on a single page.")
+            ui.display_err_and_stop(self, "Could not find single page to use as a template for cropping. Please restart the scan on a single page.")
         
         base_img = Image.open(io.BytesIO(base_img_bytes))
 
@@ -116,7 +118,7 @@ class Macmillan(_Base_web):
             except Exception as e:
                 error = e
                 time.sleep(1)
-        ui.display_err_and_stop(self, error)
+            raise MacmillanFailedPageExeption
         
     def _crop_from_left(self, img, offset_px):
         return img.crop((offset_px, 0, img.width, img.height))

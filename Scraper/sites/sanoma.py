@@ -50,7 +50,7 @@ class Sanoma(_Base_web):
         titles = [book.text for book in books_elements]
 
         ui.clear_console()
-        ui.print_reminder("Books must be set to the first page")
+        ui.print_reminder("Books must be already set to the first page")
         idx = ui.print_selector_table(titles)
         target_book_element = books_elements[idx]
         self.book = target_book_element.text
@@ -65,7 +65,7 @@ class Sanoma(_Base_web):
                 if annuities:
                     annuities_text = [annuity.text.strip() for annuity in annuities]
                     ui.clear_console()
-                    ui.print_reminder("Books must be set to the first page")
+                    ui.print_reminder("Books must be already set to the first page")
                     a_idx = ui.print_selector_table(annuities_text)
                     annuities[a_idx].click()
             except:
@@ -77,12 +77,12 @@ class Sanoma(_Base_web):
             vol_texts = [vol.text.strip() for vol in vols]
 
             ui.clear_console()
-            ui.print_reminder("Books must be set to the first page")
+            ui.print_reminder("Books must be already set to the first page")
             v_idx = ui.print_selector_table(vol_texts)
             vols[v_idx].click()
 
         except Exception as e:
-            ui.display_err_and_stop(self, f"Errore nella selezione volume: {e}")
+            ui.display_err_and_stop(self, f"Error while selecting volume: {e}")
             
         self.driver.switch_to.window(self.driver.window_handles[-1])
         ui.clear_console()

@@ -1,33 +1,63 @@
 import keyring
 import getpass
+import json
+import keyring.errors
 #local imports
 from . import ui
-class Credentials():
-    def save_credentials(self,site: str, username: str, password: str):
-        keyring.set_password(site, username, password)
 
-    def get_credentials(self,site: str):
+ACCOUNT = "bookscraper"
+
+class Credentials():
+    def save_credentials(self, site: str, username: str, password: str):
         try:
-            usernames = keyring.get_credential(site, None)  
-            if usernames:
-                return usernames.username, keyring.get_password(site, usernames.username)
-            else:
-                return None, None 
-        except Exception as e:
-            return None, None
+            keyring.set_password(site, ACCOUNT, json.dumps({"username": username, "password": password}))
+        except keyring.errors.KeyringError as e:
+            ui.print_warning(f"Could not save credentials to the system keyring: {e}", sleep_seconds=2)
+
+    def get_credentials(self, site: str):
+        try:
+            raw = keyring.get_password(site, ACCOUNT)
+            if raw:
+                data = json.loads(raw)
+                return data["username"], data["password"]
+
+            # Legacy fallback
+            legacy = keyring.get_credential(site, None)
+            if legacy and legacy.username:
+                password = keyring.get_password(site, legacy.username)
+                if password:
+                    self.save_credentials(site, legacy.username, password)  # migrate
+                    self._delete_legacy_credentials(site)
+                    return legacy.username, password
+        except Exception:
+            pass
+        return None, None
+
+    def _delete_legacy_credentials(self, site:str):
+        try:  #clear legacy entry
+            legacy = keyring.get_credential(site, None)
+            if legacy and legacy.username:
+                keyring.delete_password(site, legacy.username)
+                deleted = True
+        except Exception:
+            pass
+
     def delete_credentials(self, site: str):
-        username, _ = self.get_credentials(site)
-        if username:
-            keyring.delete_password(site, username)
-            print(f"Deleted credentials for {site}")
-        else:
-            print(f"No credentials to delete for {site}")
+        deleted = False
+        try:
+            keyring.delete_password(site, ACCOUNT)
+            deleted = True
+        except keyring.errors.KeyringError:
+            pass
+        self._delete_legacy_credentials(site)
+        print(f"Deleted credentials for {site}" if deleted else f"No credentials to delete for {site}")
+        
 
 def get_credentials(web_name:str, save_credentials: bool, correct_old_credentials = False):
     deleted = False
     credentials = Credentials()
 
-    if correct_old_credentials: 
+    if correct_old_credentials and not save_credentials: 
         credentials.delete_credentials(web_name)
         deleted = True
 
@@ -43,7 +73,7 @@ def get_credentials(web_name:str, save_credentials: bool, correct_old_credential
             deleted = True
 
     if save_credentials and (not username or deleted):
-        ui.print_reminder("Credential saving is set to True. the following credentials will be stored safely,\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
+        ui.print_reminder("Credential saving is set to True. The following credentials will be stored safely.\nIf you want to disable this behavior, set \"save-credentials\" in \"configs.json\" to false.")
     
     if not username or not save_credentials or deleted:
         while True:

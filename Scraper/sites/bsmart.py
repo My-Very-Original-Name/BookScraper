@@ -38,13 +38,11 @@ class Bsmart(_Base_web):
         self._accept_cookies()
         elements = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/books/'][data-discover='true']")
         titles = []
-        elements_text = []
         valid_elements = []
         for element in elements:
             if element.text:
                 titles.append(element.text)
                 valid_elements.append(element)
-            elements_text.append(element.text)
         ui.clear_console()
         ui.print_reminder("Books must be already set to the first page")
 

@@ -45,16 +45,18 @@ class Cambridge(_Base_web):
         ui.print_reminder("Not all Cambridge-Go books are supported, check on the reader manually, if it's formatted as a scrolling book (one page below the other) it will not be scannable.")
         ui.print_reminder("Books must be already set to the first page")
 
-        elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
         time.sleep(2)
-        i = ui.print_selector_table([element.text for element in elements])
-        self.book = elements[i].text
+        elements = self.driver.find_elements(By.CLASS_NAME, "card-details")
+        titles = [self._one_line(e.text) for e in elements]
+        i = ui.print_selector_table(titles)
+        self.book = titles[i]
         elements[i].click()
         
         elements = self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "v-card__title")))
         ui.clear_console()
-        i = ui.print_selector_table([element.text for element in elements])
-        self.book = self.book + elements[i].text
+        vol_titles = [self._one_line(e.text) for e in elements]
+        i = ui.print_selector_table(vol_titles)
+        self.book = f"{self.book} - {vol_titles[i]}"
         elements[i].click()
         time.sleep(1.5)
         
@@ -78,3 +80,6 @@ class Cambridge(_Base_web):
             self.wait.until(EC.presence_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
         except Exception:
             pass
+
+    def _one_line(self, text):
+        return " ".join(text.split())
