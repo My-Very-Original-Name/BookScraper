@@ -4,14 +4,15 @@ import json
 import keyring.errors
 #local imports
 from . import ui
-
+import logging
+logging.getLogger("dbus.proxies").setLevel(logging.CRITICAL)
 ACCOUNT = "bookscraper"
 
 class Credentials():
     def save_credentials(self, site: str, username: str, password: str):
         try:
             keyring.set_password(site, ACCOUNT, json.dumps({"username": username, "password": password}))
-        except keyring.errors.KeyringError as e:
+        except Exception as e:
             ui.print_warning(f"Could not save credentials to the system keyring: {e}", sleep_seconds=2)
 
     def get_credentials(self, site: str):
