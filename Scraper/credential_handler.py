@@ -58,7 +58,7 @@ def get_credentials(web_name:str, save_credentials: bool, correct_old_credential
     deleted = False
     credentials = Credentials()
 
-    if correct_old_credentials and not save_credentials: 
+    if correct_old_credentials and save_credentials: 
         credentials.delete_credentials(web_name)
         deleted = True
 
